@@ -14,7 +14,7 @@ def scrape_travel_money_oz() -> ProviderResult:
     Returns buy rates only (AUD -> foreign cash).
     90+ physical stores across Australia.
     """
-    result = ProviderResult(provider="TravelMoneyOz", provider_type="offline")
+    result = ProviderResult(provider="TravelMoneyOz", provider_type="Offline")
 
     payload = {
         "CorrelationId": str(uuid.uuid4()),

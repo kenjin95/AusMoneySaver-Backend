@@ -3,8 +3,9 @@ name: Scheduled exchange rate scrape
 on:
   workflow_dispatch:
   schedule:
-    # Every 30 minutes
-    - cron: "*/30 * * * *"
+    # Every 30 minutes (runs at :00 and :30 of every hour)
+    # Note: GitHub Actions may take up to 1 hour to recognize schedule changes
+    - cron: "0,30 * * * *"
 
 jobs:
   scrape-and-save:

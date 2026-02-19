@@ -70,7 +70,7 @@ def scrape_united_exchange() -> ProviderResult:
     All rates are for cash transactions (walk in with AUD, walk out with foreign).
     Rates expressed as 1 AUD = X foreign currency.
     """
-    result = ProviderResult(provider="United Currency", provider_type="offline")
+    result = ProviderResult(provider="UnitedCurrency", provider_type="Offline")
 
     with sync_playwright() as pw:
         browser = pw.chromium.launch(headless=True)
