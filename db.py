@@ -57,6 +57,34 @@ def _is_legacy_schema_error(error: APIError) -> bool:
     )
 
 
+def _normalize_provider_type(provider_type: str | None, provider: str | None = None) -> str:
+    raw = (provider_type or "").strip().lower()
+    if raw in {"bank", "banks"}:
+        return "Bank"
+    if raw in {"fintech", "fin-tech", "fin tech"}:
+        return "Fintech"
+    if raw in {
+        "offline",
+        "offline_exchange",
+        "offline_exchanges",
+        "cash_exchange",
+        "money_changer",
+    }:
+        return "Offline"
+    provider_raw = (provider or "").strip().lower()
+    if provider_raw in {"anz", "commbank"}:
+        return "Bank"
+    if provider_raw in {"wise", "remitly"}:
+        return "Fintech"
+    if provider_raw in {"unitedcurrency", "united currency", "travelmoneyoz"}:
+        return "Offline"
+    if "bank" in raw:
+        return "Bank"
+    if "fin" in raw:
+        return "Fintech"
+    return "Offline"
+
+
 def save_results(results: list[ProviderResult], run_id: str | None = None) -> int:
     """Insert all scraped rates into the exchange_rates table.
     Returns the number of rows inserted."""
@@ -70,7 +98,7 @@ def save_results(results: list[ProviderResult], run_id: str | None = None) -> in
             rows.append({
                 "run_id": effective_run_id,
                 "provider": r.provider,
-                "provider_type": r.provider_type,
+                "provider_type": _normalize_provider_type(r.provider_type, r.provider),
                 "currency": code,
                 "send_rate": rate.send_rate,
                 "receive_rate": rate.receive_rate,
