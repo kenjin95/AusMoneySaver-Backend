@@ -1,15 +1,17 @@
-"""AusMoneySaver - Exchange Rate Scraper
+"""AusMoneySaver - Exchange Rate Scraper.
 
 Fetches and compares exchange rates from Australian banks and fintech
 providers so users can find the best deal.
 """
 
-import sys
+import argparse
 import io
+import os
+import sys
+from datetime import datetime, timezone
+from typing import Callable
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
-
-from datetime import datetime
 
 from scrapers.base import TARGET_CURRENCIES, ProviderResult
 from scrapers import (
@@ -22,7 +24,7 @@ from scrapers import (
 )
 
 
-SCRAPERS: list[tuple[str, callable]] = [
+SCRAPERS: list[tuple[str, Callable[[], ProviderResult]]] = [
     ("ANZ", scrape_anz),
     ("CommBank", scrape_commbank),
     ("Wise", scrape_wise),
@@ -30,6 +32,8 @@ SCRAPERS: list[tuple[str, callable]] = [
     ("UnitedCurrency", scrape_united_exchange),
     ("TravelMoneyOz", scrape_travel_money_oz),
 ]
+
+DEFAULT_MIN_SUCCESS_PROVIDERS = int(os.getenv("MIN_SUCCESS_PROVIDERS", "5"))
 
 
 def _fmt(value: float | None) -> str:
@@ -86,8 +90,8 @@ def print_comparison(results: list[ProviderResult]) -> None:
         print("\n* Fintech fees (per transfer):")
         for r in results:
             fees_shown = set()
-            for code, rate in r.rates.items():
-                if rate.fee is not None and rate.fee not in fees_shown:
+            for rate in r.rates.values():
+                if rate.fee is not None:
                     fees_shown.add(rate.fee)
             if fees_shown:
                 print(f"  {r.provider}: {', '.join(f'${f} AUD' for f in sorted(fees_shown))}")
@@ -97,42 +101,151 @@ def print_comparison(results: list[ProviderResult]) -> None:
     print("<- Recv : rate when receiving foreign currency (you sell to get AUD)")
 
 
-def main(save_to_db: bool = False) -> None:
+def _persist_run_summary(
+    run_id: str,
+    started_at: datetime,
+    completed_at: datetime,
+    results: list[ProviderResult],
+    failures: list[dict[str, str]],
+    rows_inserted: int,
+    status: str,
+) -> bool:
+    try:
+        from db import save_run_summary
+        save_run_summary(
+            run_id=run_id,
+            started_at=started_at,
+            completed_at=completed_at,
+            results=results,
+            failures=failures,
+            rows_inserted=rows_inserted,
+            status=status,
+        )
+        print("[DB] Run summary saved.")
+        return True
+    except Exception as e:
+        print(f"[DB] Run summary save failed: {e}")
+        return False
+
+
+def main(
+    save_to_db: bool = False,
+    min_success_providers: int = DEFAULT_MIN_SUCCESS_PROVIDERS,
+    allow_partial_success: bool = False,
+) -> int:
+    if min_success_providers < 1 or min_success_providers > len(SCRAPERS):
+        raise ValueError(f"--min-success-providers must be between 1 and {len(SCRAPERS)}")
+
+    started_at = datetime.now(timezone.utc)
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    run_id = os.getenv("SCRAPE_RUN_ID", started_at.strftime("manual-%Y%m%dT%H%M%SZ"))
+
     print("AusMoneySaver - Exchange Rate Scraper")
     print(f"Time: {now}")
+    print(f"Run ID: {run_id}")
     print("-" * 40)
 
     results: list[ProviderResult] = []
+    failures: list[dict[str, str]] = []
 
     for name, scraper in SCRAPERS:
         try:
             print(f"  Fetching {name}...", end=" ", flush=True)
             data = scraper()
-            results.append(data)
             count = len(data.rates)
+            if count == 0:
+                raise RuntimeError("no rates returned")
+            results.append(data)
             print(f"OK ({count} currencies)")
         except Exception as e:
-            print(f"FAILED - {e}")
+            error_text = str(e)
+            failures.append({"provider": name, "error": error_text})
+            print(f"FAILED - {error_text}")
 
     if not results:
         print("\nNo data could be fetched from any provider.")
-        return
+        if save_to_db:
+            _persist_run_summary(
+                run_id=run_id,
+                started_at=started_at,
+                completed_at=datetime.now(timezone.utc),
+                results=[],
+                failures=failures,
+                rows_inserted=0,
+                status="failed",
+            )
+        return 1
 
     print_comparison(results)
 
+    should_fail = False
+    if len(results) < min_success_providers:
+        should_fail = True
+        print(
+            f"\n[QUALITY] Failed: {len(results)}/{len(SCRAPERS)} providers succeeded "
+            f"(required >= {min_success_providers})."
+        )
+
+    if failures and not allow_partial_success:
+        should_fail = True
+        print(
+            "\n[QUALITY] Failed: one or more providers failed. "
+            "Use --allow-partial-success to permit partial runs."
+        )
+
+    rows_saved = 0
     if save_to_db:
-        try:
-            from db import save_results
-            count = save_results(results)
-            print(f"\n[DB] Saved {count} rows to Supabase.")
-        except Exception as e:
-            print(f"\n[DB] Failed to save: {e}")
+        if should_fail:
+            print("\n[DB] Skipping save because run did not meet success criteria.")
+        else:
+            try:
+                from db import save_results
+                rows_saved = save_results(results, run_id=run_id)
+                print(f"\n[DB] Saved {rows_saved} rows to Supabase.")
+            except Exception as e:
+                print(f"\n[DB] Failed to save: {e}")
+                should_fail = True
+
+        status = "failed" if should_fail else ("partial" if failures else "success")
+        summary_ok = _persist_run_summary(
+            run_id=run_id,
+            started_at=started_at,
+            completed_at=datetime.now(timezone.utc),
+            results=results,
+            failures=failures,
+            rows_inserted=rows_saved,
+            status=status,
+        )
+        if not summary_ok:
+            print("[DB] Continuing despite run summary save failure.")
+
+    if failures:
+        print("\nFailed providers:")
+        for failure in failures:
+            print(f"  - {failure['provider']}: {failure['error']}")
+
+    return 1 if should_fail else 0
 
 
 if __name__ == "__main__":
-    import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("--save", action="store_true", help="Save results to Supabase DB")
+    parser.add_argument(
+        "--min-success-providers",
+        type=int,
+        default=DEFAULT_MIN_SUCCESS_PROVIDERS,
+        help=f"Minimum successful providers required (1-{len(SCRAPERS)}).",
+    )
+    parser.add_argument(
+        "--allow-partial-success",
+        action="store_true",
+        help="Allow runs with failed providers if minimum success threshold is met.",
+    )
     args = parser.parse_args()
-    main(save_to_db=args.save)
+    raise SystemExit(
+        main(
+            save_to_db=args.save,
+            min_success_providers=args.min_success_providers,
+            allow_partial_success=args.allow_partial_success,
+        )
+    )

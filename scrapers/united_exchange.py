@@ -5,6 +5,7 @@ from playwright.sync_api import sync_playwright
 from scrapers.base import CurrencyRate, ProviderResult
 
 URL = "https://www.unitedcurrencyexchange.com.au/"
+MAX_ATTEMPTS = 2
 
 
 def _extract_rates(body_text: str) -> tuple[dict[str, float], dict[str, float]]:
@@ -72,13 +73,26 @@ def scrape_united_exchange() -> ProviderResult:
     """
     result = ProviderResult(provider="UnitedCurrency", provider_type="Offline")
 
-    with sync_playwright() as pw:
-        browser = pw.chromium.launch(headless=True)
-        page = browser.new_page()
-        page.goto(URL, wait_until="networkidle", timeout=60_000)
-        page.wait_for_timeout(5000)
-        body_text = page.inner_text("body")
-        browser.close()
+    body_text = ""
+    last_error: Exception | None = None
+    for _attempt in range(1, MAX_ATTEMPTS + 1):
+        try:
+            with sync_playwright() as pw:
+                browser = pw.chromium.launch(headless=True)
+                page = browser.new_page()
+                page.goto(URL, wait_until="domcontentloaded", timeout=45_000)
+                page.wait_for_timeout(3000)
+                body_text = page.inner_text("body")
+                browser.close()
+            if body_text.strip():
+                break
+        except Exception as e:  # noqa: BLE001 - caller handles and records provider failures
+            last_error = e
+
+    if not body_text.strip():
+        if last_error is not None:
+            raise RuntimeError(f"failed after {MAX_ATTEMPTS} attempts: {last_error}") from last_error
+        raise RuntimeError(f"failed after {MAX_ATTEMPTS} attempts: empty page text")
 
     sell_rates, buy_rates = _extract_rates(body_text)
 

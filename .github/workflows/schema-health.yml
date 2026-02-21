@@ -1,20 +1,14 @@
-name: Scheduled exchange rate scrape
+name: Supabase schema health
 
 on:
   workflow_dispatch:
   schedule:
-    # Every 30 minutes (runs at :00 and :30 of every hour)
-    # Note: GitHub Actions may take up to 1 hour to recognize schedule changes
-    - cron: "0,30 * * * *"
-
-concurrency:
-  group: scheduled-exchange-rate-scrape
-  cancel-in-progress: false
+    - cron: "7 */6 * * *"
 
 jobs:
-  scrape-and-save:
+  schema-check:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 10
 
     permissions:
       contents: read
@@ -32,14 +26,11 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          python -m playwright install chromium
 
-      - name: Run scraper and save to Supabase
+      - name: Validate Supabase schema
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-          SCRAPE_RUN_ID: gh-${{ github.run_id }}-${{ github.run_attempt }}
-          MIN_SUCCESS_PROVIDERS: "5"
         run: |
-          python main.py --save --min-success-providers 5 --allow-partial-success
+          python scripts/check_db_schema.py

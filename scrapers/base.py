@@ -13,7 +13,7 @@ class CurrencyRate:
 @dataclass
 class ProviderResult:
     provider: str
-    provider_type: str  # "bank" or "fintech"
+    provider_type: str  # One of: "Bank", "Fintech", "Offline"
     timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
     rates: dict[str, CurrencyRate] = field(default_factory=dict)
 
