@@ -32,7 +32,7 @@ def scrape_commbank() -> ProviderResult:
     resp.raise_for_status()
     data = resp.json()
 
-    result = ProviderResult(provider="CommBank", provider_type="bank")
+    result = ProviderResult(provider="CommBank", provider_type="Bank")
     result.timestamp = data.get("timeStamp", result.timestamp)
 
     for entry in data.get("currencies", []):

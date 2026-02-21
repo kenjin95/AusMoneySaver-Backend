@@ -69,3 +69,26 @@ jobs:
           MIN_SUCCESS_PROVIDERS: "5"
         run: |
           python main.py --save --min-success-providers 5 --allow-partial-success
+
+      - name: Send triggered rate alerts
+        if: always()
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          ALERT_FROM_EMAIL: ${{ secrets.ALERT_FROM_EMAIL }}
+          PUBLIC_SITE_URL: ${{ secrets.PUBLIC_SITE_URL }}
+          ALERT_COOLDOWN_HOURS: "24"
+          AFFILIATE_LINK_ANZ: ${{ secrets.AFFILIATE_LINK_ANZ }}
+          AFFILIATE_LINK_COMMBANK: ${{ secrets.AFFILIATE_LINK_COMMBANK }}
+          AFFILIATE_LINK_NAB: ${{ secrets.AFFILIATE_LINK_NAB }}
+          AFFILIATE_LINK_WESTPAC: ${{ secrets.AFFILIATE_LINK_WESTPAC }}
+          AFFILIATE_LINK_WISE: ${{ secrets.AFFILIATE_LINK_WISE }}
+          AFFILIATE_LINK_REMITLY: ${{ secrets.AFFILIATE_LINK_REMITLY }}
+          AFFILIATE_LINK_OFX: ${{ secrets.AFFILIATE_LINK_OFX }}
+          AFFILIATE_LINK_UNITEDCURRENCY: ${{ secrets.AFFILIATE_LINK_UNITEDCURRENCY }}
+          AFFILIATE_LINK_TRAVELMONEYOZ: ${{ secrets.AFFILIATE_LINK_TRAVELMONEYOZ }}
+          AFFILIATE_LINK_TRAVELEX: ${{ secrets.AFFILIATE_LINK_TRAVELEX }}
+        run: |
+          python scripts/send_rate_alerts.py

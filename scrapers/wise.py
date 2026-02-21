@@ -15,13 +15,13 @@ HEADERS = {
 }
 
 
-def _parse_rate_from_text(text: str) -> float | None:
-    """Extract a numeric rate from text like '1,022.96' or '1,023'."""
-    m = re.search(r"[\d,]+\.?\d*", text.replace(" ", ""))
-    if not m:
+def _extract_aud_rate(text: str, code: str) -> float | None:
+    rate_pattern = rf"1\s*AUD\s*=\s*([\d,]+\.?\d*)\s*{code}"
+    match = re.search(rate_pattern, text)
+    if not match:
         return None
     try:
-        return float(m.group().replace(",", ""))
+        return float(match.group(1).replace(",", ""))
     except ValueError:
         return None
 
@@ -42,9 +42,7 @@ def _scrape_compare_page(code: str) -> CurrencyRate | None:
     soup = BeautifulSoup(resp.text, "html.parser")
     text = soup.get_text(" ", strip=True)
 
-    rate_pattern = rf"1\s*AUD\s*=\s*([\d,]+\.?\d*)\s*{code}"
-    match = re.search(rate_pattern, text)
-    mid_rate = float(match.group(1).replace(",", "")) if match else None
+    mid_rate = _extract_aud_rate(text, code)
 
     fee = None
     fee_match = re.search(r"([\d.]+)\s*AUD\s*Transparent\s*fee", text, re.IGNORECASE)
@@ -74,13 +72,9 @@ def _scrape_converter_page(code: str) -> CurrencyRate | None:
 
     soup = BeautifulSoup(resp.text, "html.parser")
     text = soup.get_text(" ", strip=True)
-
-    rate_pattern = rf"1\s*AUD\s*=\s*([\d,]+\.?\d*)\s*{code}"
-    match = re.search(rate_pattern, text)
-    if not match:
+    mid_rate = _extract_aud_rate(text, code)
+    if mid_rate is None:
         return None
-
-    mid_rate = float(match.group(1).replace(",", ""))
     return CurrencyRate(
         currency_code=code,
         send_rate=mid_rate,
@@ -94,7 +88,7 @@ def scrape_wise() -> ProviderResult:
     Wise uses the mid-market rate (no markup) and charges a separate
     transparent fee. The fee shown is for a 1000 AUD transfer.
     """
-    result = ProviderResult(provider="Wise", provider_type="fintech")
+    result = ProviderResult(provider="Wise", provider_type="Fintech")
 
     for code in TARGET_CURRENCIES:
         rate = _scrape_compare_page(code)

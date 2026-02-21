@@ -2,6 +2,7 @@
 
 import os
 from datetime import datetime, timezone
+from functools import lru_cache
 from typing import Any
 
 from dotenv import load_dotenv
@@ -16,6 +17,24 @@ SUPABASE_URL = os.getenv("SUPABASE_URL", "")
 SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
 SUPABASE_LEGACY_KEY = os.getenv("SUPABASE_KEY", "")
 
+BANK_PROVIDER_TYPES = {"bank", "banks"}
+FINTECH_PROVIDER_TYPES = {"fintech", "fin-tech", "fin tech"}
+OFFLINE_PROVIDER_TYPES = {
+    "offline",
+    "offline_exchange",
+    "offline_exchanges",
+    "cash_exchange",
+    "money_changer",
+}
+BANK_PROVIDERS = {"anz", "commbank", "nab", "westpac"}
+FINTECH_PROVIDERS = {"wise", "remitly", "ofx"}
+OFFLINE_PROVIDERS = {
+    "unitedcurrency",
+    "united currency",
+    "travelmoneyoz",
+    "travelex",
+}
+
 
 def _resolve_supabase_key() -> str:
     if SUPABASE_SERVICE_ROLE_KEY:
@@ -29,6 +48,7 @@ def _resolve_supabase_key() -> str:
     return ""
 
 
+@lru_cache(maxsize=1)
 def get_client():
     supabase_key = _resolve_supabase_key()
     if not SUPABASE_URL or not supabase_key:
@@ -59,30 +79,28 @@ def _is_legacy_schema_error(error: APIError) -> bool:
 
 def _normalize_provider_type(provider_type: str | None, provider: str | None = None) -> str:
     raw = (provider_type or "").strip().lower()
-    if raw in {"bank", "banks"}:
+    if raw in BANK_PROVIDER_TYPES:
         return "Bank"
-    if raw in {"fintech", "fin-tech", "fin tech"}:
+    if raw in FINTECH_PROVIDER_TYPES:
         return "Fintech"
-    if raw in {
-        "offline",
-        "offline_exchange",
-        "offline_exchanges",
-        "cash_exchange",
-        "money_changer",
-    }:
+    if raw in OFFLINE_PROVIDER_TYPES:
         return "Offline"
     provider_raw = (provider or "").strip().lower()
-    if provider_raw in {"anz", "commbank"}:
+    if provider_raw in BANK_PROVIDERS:
         return "Bank"
-    if provider_raw in {"wise", "remitly"}:
+    if provider_raw in FINTECH_PROVIDERS:
         return "Fintech"
-    if provider_raw in {"unitedcurrency", "united currency", "travelmoneyoz"}:
+    if provider_raw in OFFLINE_PROVIDERS:
         return "Offline"
     if "bank" in raw:
         return "Bank"
     if "fin" in raw:
         return "Fintech"
     return "Offline"
+
+
+def _drop_run_id(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [{k: v for k, v in row.items() if k != "run_id"} for row in rows]
 
 
 def save_results(results: list[ProviderResult], run_id: str | None = None) -> int:
@@ -115,7 +133,7 @@ def save_results(results: list[ProviderResult], run_id: str | None = None) -> in
     for i in range(0, len(rows), BATCH):
         batch = rows[i : i + BATCH]
         if legacy_mode:
-            legacy_batch = [{k: v for k, v in row.items() if k != "run_id"} for row in batch]
+            legacy_batch = _drop_run_id(batch)
             client.table("exchange_rates").insert(legacy_batch).execute()
             inserted += len(batch)
             continue
@@ -134,7 +152,7 @@ def save_results(results: list[ProviderResult], run_id: str | None = None) -> in
                 "[WARN] Falling back to legacy insert mode. "
                 "Apply supabase_setup.sql to enable run_id upserts."
             )
-            legacy_batch = [{k: v for k, v in row.items() if k != "run_id"} for row in batch]
+            legacy_batch = _drop_run_id(batch)
             client.table("exchange_rates").insert(legacy_batch).execute()
         inserted += len(batch)
 

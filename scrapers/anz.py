@@ -27,7 +27,7 @@ def scrape_anz() -> ProviderResult:
     resp.raise_for_status()
 
     soup = BeautifulSoup(resp.text, "html.parser")
-    result = ProviderResult(provider="ANZ", provider_type="bank")
+    result = ProviderResult(provider="ANZ", provider_type="Bank")
 
     for row in soup.find_all("tr"):
         cells = row.find_all("td")

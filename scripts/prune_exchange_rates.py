@@ -16,8 +16,11 @@ if str(ROOT_DIR) not in sys.path:
 from db import get_client
 
 
-def count_older_than(table: str, column: str, cutoff_iso: str) -> int | None:
-    client = get_client()
+def _is_missing_table_error(error: APIError) -> bool:
+    return "404" in str(error)
+
+
+def count_older_than(client, table: str, column: str, cutoff_iso: str) -> int | None:
     try:
         response = (
             client.table(table)
@@ -26,14 +29,13 @@ def count_older_than(table: str, column: str, cutoff_iso: str) -> int | None:
             .execute()
         )
     except APIError as e:
-        if "404" in str(e):
+        if _is_missing_table_error(e):
             return None
         raise
     return response.count or 0
 
 
-def delete_older_than(table: str, column: str, cutoff_iso: str) -> int | None:
-    client = get_client()
+def delete_older_than(client, table: str, column: str, cutoff_iso: str) -> int | None:
     try:
         response = (
             client.table(table)
@@ -42,7 +44,7 @@ def delete_older_than(table: str, column: str, cutoff_iso: str) -> int | None:
             .execute()
         )
     except APIError as e:
-        if "404" in str(e):
+        if _is_missing_table_error(e):
             return None
         raise
     return response.count or 0
@@ -63,9 +65,10 @@ def main() -> int:
     now = datetime.now(timezone.utc)
     rates_cutoff = (now - timedelta(days=args.days)).isoformat()
     runs_cutoff = (now - timedelta(days=args.run_days)).isoformat()
+    client = get_client()
 
-    rates_to_delete = count_older_than("exchange_rates", "scraped_at", rates_cutoff)
-    runs_to_delete = count_older_than("scrape_runs", "completed_at", runs_cutoff)
+    rates_to_delete = count_older_than(client, "exchange_rates", "scraped_at", rates_cutoff)
+    runs_to_delete = count_older_than(client, "scrape_runs", "completed_at", runs_cutoff)
 
     print(f"Now (UTC): {now.isoformat()}")
     print(f"exchange_rates cutoff: {rates_cutoff}")
@@ -80,8 +83,8 @@ def main() -> int:
         print("Dry run mode: no rows deleted.")
         return 0
 
-    deleted_rates = delete_older_than("exchange_rates", "scraped_at", rates_cutoff)
-    deleted_runs = delete_older_than("scrape_runs", "completed_at", runs_cutoff)
+    deleted_rates = delete_older_than(client, "exchange_rates", "scraped_at", rates_cutoff)
+    deleted_runs = delete_older_than(client, "scrape_runs", "completed_at", runs_cutoff)
 
     print(f"Deleted exchange_rates rows: {deleted_rates}")
     if deleted_runs is None:

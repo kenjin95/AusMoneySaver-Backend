@@ -19,12 +19,17 @@ def parse_timestamp(raw: str) -> datetime:
     return datetime.fromisoformat(raw.replace("Z", "+00:00"))
 
 
+def resolve_supabase_key() -> str:
+    return (
+        os.getenv("SUPABASE_ANON_KEY")
+        or os.getenv("SUPABASE_KEY")
+        or os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+        or ""
+    )
+
+
 def fetch_latest_scraped_at(supabase_url: str, supabase_key: str) -> tuple[datetime, str]:
-    headers = {
-        "apikey": supabase_key,
-        "Authorization": f"Bearer {supabase_key}",
-        "Accept": "application/json",
-    }
+    headers = {"apikey": supabase_key, "Authorization": f"Bearer {supabase_key}", "Accept": "application/json"}
 
     errors: list[str] = []
     for endpoint in ENDPOINTS:
@@ -56,12 +61,7 @@ def main() -> int:
 
     load_dotenv()
     supabase_url = os.getenv("SUPABASE_URL", "")
-    supabase_key = (
-        os.getenv("SUPABASE_ANON_KEY")
-        or os.getenv("SUPABASE_KEY")
-        or os.getenv("SUPABASE_SERVICE_ROLE_KEY")
-        or ""
-    )
+    supabase_key = resolve_supabase_key()
     if not supabase_url or not supabase_key:
         raise RuntimeError(
             "SUPABASE_URL and one of SUPABASE_ANON_KEY/SUPABASE_KEY/"

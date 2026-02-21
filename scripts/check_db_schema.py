@@ -21,6 +21,7 @@ REQUIRED_ENDPOINTS = (
     "exchange_rates",
     "latest_exchange_rates",
     "scrape_runs",
+    "rate_alerts",
 )
 
 

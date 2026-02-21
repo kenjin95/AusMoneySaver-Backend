@@ -11,26 +11,35 @@ import sys
 from datetime import datetime, timezone
 from typing import Callable
 
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
+if hasattr(sys.stdout, "buffer"):
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 
 from scrapers.base import TARGET_CURRENCIES, ProviderResult
 from scrapers import (
     scrape_anz,
     scrape_commbank,
+    scrape_nab,
+    scrape_westpac,
     scrape_wise,
     scrape_remitly,
+    scrape_ofx,
     scrape_united_exchange,
     scrape_travel_money_oz,
+    scrape_travelex,
 )
 
 
 SCRAPERS: list[tuple[str, Callable[[], ProviderResult]]] = [
     ("ANZ", scrape_anz),
     ("CommBank", scrape_commbank),
+    ("NAB", scrape_nab),
+    ("Westpac", scrape_westpac),
     ("Wise", scrape_wise),
     ("Remitly", scrape_remitly),
+    ("OFX", scrape_ofx),
     ("UnitedCurrency", scrape_united_exchange),
     ("TravelMoneyOz", scrape_travel_money_oz),
+    ("Travelex", scrape_travelex),
 ]
 
 DEFAULT_MIN_SUCCESS_PROVIDERS = int(os.getenv("MIN_SUCCESS_PROVIDERS", "5"))
@@ -39,12 +48,8 @@ DEFAULT_MIN_SUCCESS_PROVIDERS = int(os.getenv("MIN_SUCCESS_PROVIDERS", "5"))
 def _fmt(value: float | None) -> str:
     if value is None:
         return "       N/A "
-    if value >= 1000:
-        return f"{value:>11.2f}"
     if value >= 100:
         return f"{value:>11.2f}"
-    if value >= 10:
-        return f"{value:>11.4f}"
     return f"{value:>11.4f}"
 
 
@@ -89,12 +94,11 @@ def print_comparison(results: list[ProviderResult]) -> None:
     if has_fee:
         print("\n* Fintech fees (per transfer):")
         for r in results:
-            fees_shown = set()
-            for rate in r.rates.values():
-                if rate.fee is not None:
-                    fees_shown.add(rate.fee)
+            fees_shown = sorted(
+                {rate.fee for rate in r.rates.values() if rate.fee is not None}
+            )
             if fees_shown:
-                print(f"  {r.provider}: {', '.join(f'${f} AUD' for f in sorted(fees_shown))}")
+                print(f"  {r.provider}: {', '.join(f'${f} AUD' for f in fees_shown)}")
 
     print("\nAll rates expressed as: 1 AUD = X foreign currency")
     print("Send -> : rate when sending AUD overseas (you buy foreign currency)")

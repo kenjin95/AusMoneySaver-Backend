@@ -31,9 +31,9 @@ set provider_type = case
   when lower(replace(trim(provider_type), ' ', '_')) in (
     'offline', 'offline_exchange', 'offline_exchanges', 'cash_exchange', 'money_changer'
   ) then 'Offline'
-  when lower(provider) in ('anz', 'commbank') then 'Bank'
-  when lower(provider) in ('wise', 'remitly') then 'Fintech'
-  when lower(provider) in ('unitedcurrency', 'united currency', 'travelmoneyoz') then 'Offline'
+  when lower(provider) in ('anz', 'commbank', 'nab', 'westpac') then 'Bank'
+  when lower(provider) in ('wise', 'remitly', 'ofx') then 'Fintech'
+  when lower(provider) in ('unitedcurrency', 'united currency', 'travelmoneyoz', 'travelex') then 'Offline'
   when lower(trim(provider_type)) like '%bank%' then 'Bank'
   when lower(trim(provider_type)) like '%fin%' then 'Fintech'
   else 'Offline'
@@ -44,9 +44,9 @@ where provider_type is distinct from case
   when lower(replace(trim(provider_type), ' ', '_')) in (
     'offline', 'offline_exchange', 'offline_exchanges', 'cash_exchange', 'money_changer'
   ) then 'Offline'
-  when lower(provider) in ('anz', 'commbank') then 'Bank'
-  when lower(provider) in ('wise', 'remitly') then 'Fintech'
-  when lower(provider) in ('unitedcurrency', 'united currency', 'travelmoneyoz') then 'Offline'
+  when lower(provider) in ('anz', 'commbank', 'nab', 'westpac') then 'Bank'
+  when lower(provider) in ('wise', 'remitly', 'ofx') then 'Fintech'
+  when lower(provider) in ('unitedcurrency', 'united currency', 'travelmoneyoz', 'travelex') then 'Offline'
   when lower(trim(provider_type)) like '%bank%' then 'Bank'
   when lower(trim(provider_type)) like '%fin%' then 'Fintech'
   else 'Offline'
@@ -89,11 +89,93 @@ create table if not exists public.scrape_runs (
 create index if not exists idx_scrape_runs_completed_at on public.scrape_runs (completed_at desc);
 create index if not exists idx_scrape_runs_status on public.scrape_runs (status);
 
+create table if not exists public.rate_alerts (
+  id               bigserial primary key,
+  email            text not null,
+  currency         text not null,
+  target_rate      double precision not null,
+  direction        text not null default 'gte',
+  is_active        boolean not null default true,
+  created_at       timestamptz not null default now(),
+  last_notified_at timestamptz
+);
+
+alter table public.rate_alerts add column if not exists email text;
+alter table public.rate_alerts add column if not exists currency text;
+alter table public.rate_alerts add column if not exists target_rate double precision;
+alter table public.rate_alerts add column if not exists direction text;
+alter table public.rate_alerts add column if not exists is_active boolean;
+alter table public.rate_alerts add column if not exists created_at timestamptz not null default now();
+alter table public.rate_alerts add column if not exists last_notified_at timestamptz;
+alter table public.rate_alerts alter column direction set default 'gte';
+alter table public.rate_alerts alter column is_active set default true;
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'rate_alerts_target_rate_chk'
+  ) then
+    alter table public.rate_alerts
+      add constraint rate_alerts_target_rate_chk
+      check (target_rate > 0) not valid;
+  end if;
+end $$;
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'rate_alerts_direction_chk'
+  ) then
+    alter table public.rate_alerts
+      add constraint rate_alerts_direction_chk
+      check (direction in ('gte', 'lte')) not valid;
+  end if;
+end $$;
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'rate_alerts_currency_chk'
+  ) then
+    alter table public.rate_alerts
+      add constraint rate_alerts_currency_chk
+      check (currency ~ '^[A-Z]{3}$') not valid;
+  end if;
+end $$;
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'rate_alerts_email_chk'
+  ) then
+    alter table public.rate_alerts
+      add constraint rate_alerts_email_chk
+      check (position('@' in email) > 1) not valid;
+  end if;
+end $$;
+
+create index if not exists idx_rate_alerts_active_currency
+  on public.rate_alerts (is_active, currency);
+create index if not exists idx_rate_alerts_created_at
+  on public.rate_alerts (created_at desc);
+create unique index if not exists uq_rate_alerts_active
+  on public.rate_alerts (email, currency, target_rate, direction)
+  where is_active;
+
 -- Security model:
--- - anon/authenticated: read-only
--- - service_role: write
+-- - anon/authenticated: read exchange rates, write rate alerts
+-- - service_role: scraper writes + alert processing
 alter table public.exchange_rates enable row level security;
 alter table public.scrape_runs enable row level security;
+alter table public.rate_alerts enable row level security;
 
 drop policy if exists exchange_rates_select_policy on public.exchange_rates;
 create policy exchange_rates_select_policy
@@ -131,9 +213,51 @@ create policy scrape_runs_update_service_policy
   using (true)
   with check (true);
 
+drop policy if exists rate_alerts_insert_public_policy on public.rate_alerts;
+create policy rate_alerts_insert_public_policy
+  on public.rate_alerts
+  for insert
+  to anon, authenticated
+  with check (
+    target_rate > 0
+    and direction in ('gte', 'lte')
+    and currency ~ '^[A-Z]{3}$'
+    and position('@' in email) > 1
+  );
+
+drop policy if exists rate_alerts_select_service_policy on public.rate_alerts;
+create policy rate_alerts_select_service_policy
+  on public.rate_alerts
+  for select
+  to service_role
+  using (true);
+
+drop policy if exists rate_alerts_update_service_policy on public.rate_alerts;
+create policy rate_alerts_update_service_policy
+  on public.rate_alerts
+  for update
+  to service_role
+  using (true)
+  with check (true);
+
 revoke all on table public.exchange_rates from anon, authenticated;
 revoke all on table public.scrape_runs from anon, authenticated;
+revoke all on table public.rate_alerts from anon, authenticated;
 revoke all on sequence public.exchange_rates_id_seq from anon, authenticated;
+
+do $$
+begin
+  if exists (
+    select 1
+    from pg_class c
+    join pg_namespace n on n.oid = c.relnamespace
+    where n.nspname = 'public'
+      and c.relname = 'rate_alerts_id_seq'
+      and c.relkind = 'S'
+  ) then
+    revoke all on sequence public.rate_alerts_id_seq from anon, authenticated;
+  end if;
+end $$;
 
 grant usage on schema public to anon, authenticated, service_role;
 grant select on public.exchange_rates to anon, authenticated;
@@ -142,6 +266,23 @@ grant usage, select on sequence public.exchange_rates_id_seq to service_role;
 
 grant select on public.scrape_runs to authenticated;
 grant insert, update on public.scrape_runs to service_role;
+
+grant insert on public.rate_alerts to anon, authenticated;
+grant select, insert, update on public.rate_alerts to service_role;
+
+do $$
+begin
+  if exists (
+    select 1
+    from pg_class c
+    join pg_namespace n on n.oid = c.relnamespace
+    where n.nspname = 'public'
+      and c.relname = 'rate_alerts_id_seq'
+      and c.relkind = 'S'
+  ) then
+    grant usage, select on sequence public.rate_alerts_id_seq to anon, authenticated, service_role;
+  end if;
+end $$;
 
 -- View: latest row per (provider, currency) for UI.
 create or replace view public.latest_exchange_rates as

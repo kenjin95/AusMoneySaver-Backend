@@ -159,6 +159,9 @@ venv.bak/
 .dmypy.json
 dmypy.json
 
+# Local frontend config (Supabase keys, not for git)
+frontend/config.js
+
 # Pyre type checker
 .pyre/
 

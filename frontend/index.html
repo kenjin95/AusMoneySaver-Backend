@@ -1,0 +1,1164 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="data:," />
+  <title>AusMoneySaver ??Compare Exchange Rates in Australia</title>
+  <meta name="description" content="Compare exchange rates from Australian banks, fintechs and offline money changers. Find the cheapest way to send money overseas or exchange cash." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    .spin{animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+    .fade-in{animation:fadeIn .25s ease}@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+    select option{background:#0f172a}
+    .pill-on{background:#10b981;color:#022c22;border-color:#10b981}
+    .pill-off{background:transparent;color:#94a3b8;border:1px solid #334155}
+    .pill-off:hover{background:#1e293b}
+    .ad-slot{border:1px dashed #334155;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#475569;font-size:11px;letter-spacing:.05em;text-transform:uppercase;min-height:90px;background:#0f172a50}
+    .faq-answer{max-height:0;overflow:hidden;transition:max-height .3s ease}
+    .faq-open .faq-answer{max-height:500px}
+    .faq-chevron{transition:transform .3s ease}
+    .faq-open .faq-chevron{transform:rotate(180deg)}
+    html{scroll-behavior:smooth}
+  </style>
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-100 font-sans">
+
+<!-- ?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧??NAVBAR ?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧??-->
+<nav class="sticky top-0 z-50 border-b border-slate-800 bg-slate-950/90 backdrop-blur-lg">
+  <div class="mx-auto max-w-7xl px-4 h-14 flex items-center justify-between">
+    <a href="#" class="flex items-center gap-2.5">
+      <div class="h-8 w-8 rounded-xl bg-emerald-500 flex items-center justify-center text-slate-950 font-extrabold text-sm shadow-lg shadow-emerald-500/30">A$</div>
+      <span class="font-bold text-white text-lg">AusMoneySaver</span>
+    </a>
+    <div class="hidden md:flex items-center gap-6 text-sm text-slate-400">
+      <a href="#calculator" class="hover:text-white transition">Calculator</a>
+      <a href="#compare" class="hover:text-white transition">Compare Rates</a>
+      <a href="#savings" class="hover:text-white transition">Savings</a>
+      <a href="#providers" class="hover:text-white transition">Providers</a>
+      <a href="#faq" class="hover:text-white transition">FAQ</a>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="hidden sm:flex flex-col items-end text-[10px] text-slate-400 leading-tight">
+        <span>Last updated</span>
+        <span id="last-updated" class="font-mono text-slate-200">??/span>
+      </div>
+      <div class="hidden sm:flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 px-3 py-1 text-[11px] text-emerald-300">
+        <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,.9)]"></span>
+        Live
+      </div>
+      <button id="mobile-menu-btn" class="md:hidden p-1.5 rounded-lg hover:bg-slate-800">
+        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+    </div>
+  </div>
+  <!-- Mobile menu -->
+  <div id="mobile-menu" class="hidden md:hidden border-t border-slate-800 px-4 py-3 space-y-2 text-sm">
+    <a href="#calculator" class="block py-1.5 text-slate-300 hover:text-white">Calculator</a>
+    <a href="#compare" class="block py-1.5 text-slate-300 hover:text-white">Compare Rates</a>
+    <a href="#savings" class="block py-1.5 text-slate-300 hover:text-white">Savings</a>
+    <a href="#providers" class="block py-1.5 text-slate-300 hover:text-white">Providers</a>
+    <a href="#faq" class="block py-1.5 text-slate-300 hover:text-white">FAQ</a>
+  </div>
+</nav>
+
+<!-- ?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧??HERO + CALCULATOR ?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧??-->
+<section id="calculator" class="relative overflow-hidden border-b border-slate-800">
+  <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-transparent to-sky-500/5 pointer-events-none"></div>
+  <div class="mx-auto max-w-7xl px-4 py-12 sm:py-16 relative">
+    <div class="grid gap-10 lg:grid-cols-2 items-center">
+      <!-- Left: text -->
+      <div>
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white leading-tight">
+          Stop overpaying<br/>on exchange rates
+        </h1>
+        <p class="mt-4 text-base sm:text-lg text-slate-300 max-w-lg">
+          We compare <span class="text-emerald-300 font-semibold">10 providers</span> across
+          <span class="text-emerald-300 font-semibold">21 currencies</span> every 10 minutes,
+          so you always find the best deal for your money.
+        </p>
+        <div class="mt-6 flex items-center gap-6 text-sm">
+          <div class="flex items-center gap-2">
+            <div class="h-8 w-8 rounded-full bg-sky-500/20 flex items-center justify-center"><span class="text-sky-300 text-xs font-bold">?룱</span></div>
+            <span class="text-slate-300">4 Banks</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="h-8 w-8 rounded-full bg-violet-500/20 flex items-center justify-center"><span class="text-violet-300 text-xs font-bold">??/span></div>
+            <span class="text-slate-300">3 Fintechs</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="h-8 w-8 rounded-full bg-amber-500/20 flex items-center justify-center"><span class="text-amber-300 text-xs font-bold">?룵</span></div>
+            <span class="text-slate-300">3 Offline</span>
+          </div>
+        </div>
+      </div>
+      <!-- Right: calculator card -->
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-2xl backdrop-blur">
+        <h2 class="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-4">Quick Calculator</h2>
+        <div class="space-y-4">
+          <div>
+            <label class="text-[11px] text-slate-400 font-medium uppercase tracking-wide">You send (AUD)</label>
+            <input id="calc-amount" type="number" value="1000" min="1" step="1"
+              class="mt-1 w-full rounded-xl bg-slate-800 border border-slate-700 px-4 py-3 text-lg font-semibold text-white outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/30 transition" />
+          </div>
+          <div>
+            <label class="text-[11px] text-slate-400 font-medium uppercase tracking-wide">They receive</label>
+            <select id="calc-currency"
+              class="mt-1 w-full rounded-xl bg-slate-800 border border-slate-700 px-4 py-3 text-sm text-slate-100 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/30 transition">
+            </select>
+          </div>
+          <div id="calc-results" class="space-y-2 mt-2">
+            <div class="text-xs text-slate-500 text-center py-4">Enter an amount to see results</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧??AD: TOP BANNER ?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧??-->
+<section class="mx-auto max-w-7xl px-4 pt-4 pb-2">
+  <div class="rounded-2xl border border-emerald-500/30 bg-gradient-to-r from-emerald-500/15 via-slate-900 to-sky-500/10 p-5 sm:p-6">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <div class="text-xs font-bold uppercase tracking-wider text-emerald-300">Right Now Best Option</div>
+        <div id="reco-provider" class="mt-1 text-2xl font-extrabold text-white">Set amount and currency</div>
+        <div id="reco-explain" class="mt-1 text-sm text-slate-300">We will instantly rank providers by how much the receiver gets.</div>
+      </div>
+      <div class="text-right">
+        <div class="text-[11px] uppercase tracking-wider text-slate-400">Receiver gets</div>
+        <div id="reco-amount" class="text-3xl font-extrabold text-emerald-300">??/div>
+        <div id="reco-delta" class="text-xs text-emerald-200">??/div>
+        <a id="reco-cta" href="#"
+          class="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-emerald-500 px-3 py-2 text-xs font-semibold text-emerald-950 transition hover:bg-emerald-400"
+          target="_blank" rel="noopener noreferrer sponsored nofollow">
+          Open Best Provider
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="mx-auto max-w-7xl px-4 py-4">
+  <div class="ad-slot h-[90px] rounded-xl" data-ad="top-banner">
+    Ad Space 쨌 728횞90 Leaderboard
+  </div>
+</div>
+
+<!-- ?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧??POPULAR CURRENCIES ?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧??-->
+<section class="mx-auto max-w-7xl px-4 pb-6">
+  <h2 class="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-3">Popular Currencies</h2>
+  <div class="flex gap-2 overflow-x-auto pb-2 scrollbar-hide" id="popular-strip">
+    <!-- Filled by JS -->
+  </div>
+</section>
+
+<!-- ?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧??SUMMARY CARDS ?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧??-->
+<section class="mx-auto max-w-7xl px-4 pb-6">
+  <div class="grid gap-4 sm:grid-cols-3">
+    <div class="rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-emerald-500/15 to-slate-900 p-5 shadow-[0_0_30px_rgba(16,185,129,.15)]">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-[10px] font-bold uppercase tracking-widest text-emerald-400">Best Overall</span>
+        <span class="text-[9px] rounded-full bg-emerald-500/20 text-emerald-200 px-2 py-0.5 font-semibold">RECOMMENDED</span>
+      </div>
+      <div id="card-best-name" class="text-lg font-bold text-white">??/div>
+      <div id="card-best-sub" class="text-[11px] text-slate-400 mt-1">Highest avg send rate across all 21 currencies</div>
+    </div>
+    <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
+      <span class="text-[10px] font-bold uppercase tracking-widest text-rose-400">Avoid</span>
+      <div id="card-worst-name" class="text-lg font-bold text-white mt-2">??/div>
+      <div id="card-worst-sub" class="text-[11px] text-slate-400 mt-1">Lowest avg send rate ??switch and save</div>
+    </div>
+    <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
+      <span class="text-[10px] font-bold uppercase tracking-widest text-amber-400">Best Cash Exchange</span>
+      <div id="card-offline-name" class="text-lg font-bold text-white mt-2">??/div>
+      <div id="card-offline-sub" class="text-[11px] text-slate-400 mt-1">Best offline provider for walk-in customers</div>
+    </div>
+  </div>
+</section>
+
+<!-- ?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧??MAIN TABLE ?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧??-->
+<section id="compare" class="mx-auto max-w-7xl px-4 pb-8">
+  <!-- Filters -->
+  <div class="rounded-t-2xl border border-b-0 border-slate-800 bg-slate-900/60 px-4 py-4">
+    <div class="grid gap-4 sm:grid-cols-[1fr_1fr_auto] items-end">
+      <div class="space-y-1.5">
+        <label class="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Focus Currency</label>
+        <select id="filter-currency"
+          class="w-full rounded-xl border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-400 focus:ring focus:ring-emerald-500/30 transition">
+          <option value="">All 21 Currencies</option>
+        </select>
+      </div>
+      <div class="space-y-1.5">
+        <label class="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Highlight By</label>
+        <select id="filter-metric"
+          class="w-full rounded-xl border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-400 focus:ring focus:ring-emerald-500/30 transition">
+          <option value="send">Best Send Rate (AUD ??Foreign)</option>
+          <option value="receive">Best Receive Rate (Foreign ??AUD)</option>
+        </select>
+      </div>
+      <div class="space-y-1.5">
+        <label class="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Provider</label>
+        <div class="flex gap-1.5" id="group-btns">
+          <button data-group="" class="pill-on rounded-full px-3 py-2 text-xs font-medium border transition">All</button>
+          <button data-group="Bank" class="pill-off rounded-full px-3 py-2 text-xs font-medium transition">Banks</button>
+          <button data-group="Fintech" class="pill-off rounded-full px-3 py-2 text-xs font-medium transition">Fintech</button>
+          <button data-group="Offline" class="pill-off rounded-full px-3 py-2 text-xs font-medium transition">Offline</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Table -->
+  <div class="rounded-b-2xl border border-slate-800 bg-slate-900/70 overflow-hidden shadow-xl">
+    <div class="border-b border-slate-800 px-4 py-2.5 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <h2 class="text-sm font-semibold text-white">Live Exchange Rates</h2>
+        <span class="text-[10px] text-slate-500">1 AUD = X foreign currency</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="hidden sm:inline text-[10px] text-slate-500"><span class="text-emerald-400">??/span> Best deal</span>
+        <span id="row-count" class="text-[10px] rounded-full bg-slate-800 px-2 py-0.5 text-slate-400"></span>
+        <button id="refresh-btn" class="flex items-center gap-1 text-[10px] text-slate-400 hover:text-emerald-300 transition" title="Refresh now">
+          <svg id="refresh-icon" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+          </svg>
+          Refresh
+        </button>
+      </div>
+    </div>
+    <div class="border-b border-slate-800 px-4 py-2.5 flex flex-wrap items-center gap-2 text-xs">
+      <span id="freshness-badge" class="rounded-full bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 text-emerald-300">Freshness: checking...</span>
+      <span id="coverage-badge" class="rounded-full bg-slate-800 border border-slate-700 px-2.5 py-1 text-slate-300">Coverage: checking...</span>
+      <span id="na-badge" class="rounded-full bg-slate-800 border border-slate-700 px-2.5 py-1 text-slate-400">N/A means provider did not quote that pair in the latest snapshot.</span>
+    </div>
+    <div class="overflow-auto max-h-[540px]">
+      <table class="min-w-full border-separate border-spacing-0 text-xs" id="rates-table">
+        <thead class="sticky top-0 z-20"><tr id="table-head-row"></tr></thead>
+        <tbody id="rates-body">
+          <tr><td colspan="7" class="px-4 py-12 text-center text-slate-400">
+            <svg class="spin h-5 w-5 mx-auto mb-2 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+            Loading rates from Supabase...          </td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="border-t border-slate-800 px-4 py-2 flex items-center justify-between text-[10px] text-slate-500">
+      <span>Send ?? AUD to foreign 쨌 Recv ?? foreign to AUD 쨌 N/A = not available</span>
+      <span id="data-age"></span>
+    </div>
+  </div>
+</section>
+
+<!-- ?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧??AD: MID-PAGE ?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧??-->
+<div class="mx-auto max-w-7xl px-4 pb-8">
+  <div class="ad-slot h-[250px] rounded-xl" data-ad="mid-page-rect">
+    Ad Space 쨌 300횞250 Medium Rectangle
+  </div>
+</div>
+
+<!-- ?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧??SAVINGS CALCULATOR ?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧??-->
+<section id="savings" class="mx-auto max-w-7xl px-4 pb-12">
+  <div class="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 sm:p-8">
+    <h2 class="text-xl font-bold text-white mb-1">How much could you save?</h2>
+    <p class="text-sm text-slate-400 mb-6">Compare any two providers side by side for your chosen currency.</p>
+    <div class="grid gap-6 sm:grid-cols-[1fr_1fr_1fr_auto] items-end">
+      <div class="space-y-1.5">
+        <label class="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Amount (AUD)</label>
+        <input id="save-amount" type="number" value="1000" min="1"
+          class="w-full rounded-xl bg-slate-800 border border-slate-700 px-3 py-2.5 text-sm text-white outline-none focus:border-emerald-400 focus:ring focus:ring-emerald-500/30 transition" />
+      </div>
+      <div class="space-y-1.5">
+        <label class="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Currency</label>
+        <select id="save-currency"
+          class="w-full rounded-xl bg-slate-800 border border-slate-700 px-3 py-2.5 text-sm text-slate-100 outline-none focus:border-emerald-400 focus:ring focus:ring-emerald-500/30 transition">
+        </select>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="space-y-1.5">
+          <label class="text-[10px] font-semibold uppercase tracking-widest text-rose-400">From (expensive)</label>
+          <select id="save-from"
+            class="w-full rounded-xl bg-slate-800 border border-slate-700 px-3 py-2.5 text-sm text-slate-100 outline-none focus:border-rose-400 focus:ring focus:ring-rose-500/30 transition">
+          </select>
+        </div>
+        <div class="space-y-1.5">
+          <label class="text-[10px] font-semibold uppercase tracking-widest text-emerald-400">To (cheaper)</label>
+          <select id="save-to"
+            class="w-full rounded-xl bg-slate-800 border border-slate-700 px-3 py-2.5 text-sm text-slate-100 outline-none focus:border-emerald-400 focus:ring focus:ring-emerald-500/30 transition">
+          </select>
+        </div>
+      </div>
+      <button id="save-calc-btn" class="rounded-xl bg-emerald-500 hover:bg-emerald-400 text-emerald-950 font-semibold px-5 py-2.5 text-sm transition shadow-lg shadow-emerald-500/30">
+        Calculate
+      </button>
+    </div>
+    <div id="save-result" class="mt-6 hidden">
+      <div class="grid sm:grid-cols-3 gap-4">
+        <div class="rounded-xl bg-rose-500/10 border border-rose-500/20 p-4 text-center">
+          <div class="text-[10px] text-rose-400 uppercase font-bold tracking-wider mb-1" id="save-from-label">??/div>
+          <div class="text-xl font-bold text-white" id="save-from-amount">??/div>
+          <div class="text-[10px] text-slate-400 mt-1" id="save-from-rate">??/div>
+        </div>
+        <div class="rounded-xl bg-emerald-500/10 border border-emerald-500/20 p-4 text-center">
+          <div class="text-[10px] text-emerald-400 uppercase font-bold tracking-wider mb-1" id="save-to-label">??/div>
+          <div class="text-xl font-bold text-white" id="save-to-amount">??/div>
+          <div class="text-[10px] text-slate-400 mt-1" id="save-to-rate">??/div>
+        </div>
+        <div class="rounded-xl bg-gradient-to-br from-emerald-500/20 to-slate-900 border border-emerald-500/30 p-4 text-center flex flex-col justify-center">
+          <div class="text-[10px] text-emerald-300 uppercase font-bold tracking-wider mb-1">You Save</div>
+          <div class="text-2xl font-extrabold text-emerald-300" id="save-diff">??/div>
+          <div class="text-[10px] text-slate-400 mt-1" id="save-pct">??/div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧??PROVIDER PROFILES ?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧??-->
+<section id="providers" class="mx-auto max-w-7xl px-4 pb-12">
+  <h2 class="text-xl font-bold text-white mb-1">Provider Profiles</h2>
+  <p class="text-sm text-slate-400 mb-6">Quick overview of each provider we track.</p>
+  <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" id="provider-cards">
+    <!-- Filled by JS -->
+  </div>
+</section>
+
+<!-- ?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧??AD: IN-CONTENT ?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧??-->
+<div class="mx-auto max-w-7xl px-4 pb-8">
+  <div class="ad-slot h-[90px] rounded-xl" data-ad="in-content-banner">
+    Ad Space 쨌 728횞90 Leaderboard
+  </div>
+</div>
+
+<!-- ?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧??RATE ALERT SIGNUP ?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧??-->
+<section class="mx-auto max-w-7xl px-4 pb-12">
+  <div class="rounded-2xl border border-slate-800 bg-gradient-to-r from-emerald-500/10 via-slate-900 to-sky-500/10 p-8 text-center">
+    <div class="text-3xl mb-2">?뵒</div>
+    <h2 class="text-xl font-bold text-white mb-2">Get Rate Alerts</h2>
+    <p class="text-sm text-slate-400 mb-6 max-w-md mx-auto">
+      Be the first to know when your target rate is hit. We'll send you an email so you never miss the best deal.
+    </p>
+    <form id="alert-form" class="max-w-md mx-auto space-y-3">
+      <input id="alert-email" type="email" placeholder="Enter your email"
+        class="w-full rounded-xl bg-slate-800 border border-slate-700 px-4 py-3 text-sm text-white outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/30 transition placeholder:text-slate-600" />
+      <div class="grid grid-cols-2 gap-3">
+        <select id="alert-currency"
+          class="rounded-xl bg-slate-800 border border-slate-700 px-3 py-3 text-sm text-slate-100 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/30 transition"></select>
+        <input id="alert-target-rate" type="number" min="0" step="0.0001" placeholder="Target send rate"
+          class="rounded-xl bg-slate-800 border border-slate-700 px-3 py-3 text-sm text-white outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/30 transition placeholder:text-slate-600" />
+      </div>
+      <button type="submit"
+        class="w-full rounded-xl bg-emerald-500 hover:bg-emerald-400 text-emerald-950 font-semibold px-6 py-3 text-sm transition shadow-lg shadow-emerald-500/30 whitespace-nowrap">
+        Save Alert
+      </button>
+    </form>
+    <div id="alert-msg" class="mt-3 text-xs text-emerald-300 hidden"></div>
+  </div>
+</section>
+
+<!-- ?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧??FAQ ?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧??-->
+<section id="faq" class="mx-auto max-w-7xl px-4 pb-12">
+  <h2 class="text-xl font-bold text-white mb-6">Frequently Asked Questions</h2>
+  <div class="space-y-3" id="faq-list">
+    <div class="faq-item rounded-xl border border-slate-800 bg-slate-900/70 overflow-hidden">
+      <button class="faq-btn w-full flex items-center justify-between px-5 py-4 text-left text-sm font-medium text-slate-100 hover:bg-slate-800/50 transition">
+        <span>How often are the rates updated?</span>
+        <svg class="faq-chevron h-4 w-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+      </button>
+      <div class="faq-answer px-5 text-sm text-slate-300 leading-relaxed">
+        <div class="pb-4">Our automated scraper polls every 10 minutes via GitHub Actions and only writes when data is stale. We currently track 10 providers and auto-refresh the site to match the latest snapshot.</div>
+      </div>
+    </div>
+    <div class="faq-item rounded-xl border border-slate-800 bg-slate-900/70 overflow-hidden">
+      <button class="faq-btn w-full flex items-center justify-between px-5 py-4 text-left text-sm font-medium text-slate-100 hover:bg-slate-800/50 transition">
+        <span>What does "Send Rate" vs "Receive Rate" mean?</span>
+        <svg class="faq-chevron h-4 w-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+      </button>
+      <div class="faq-answer px-5 text-sm text-slate-300 leading-relaxed">
+        <div class="pb-4"><strong>Send Rate</strong> (AUD ??Foreign): How much foreign currency you get when sending AUD overseas. Higher is better for you.<br/><strong>Receive Rate</strong> (Foreign ??AUD): The rate applied when converting foreign currency back to AUD. Also expressed as 1 AUD = X foreign, so higher means the provider is offering less ??look for the lowest here.</div>
+      </div>
+    </div>
+    <div class="faq-item rounded-xl border border-slate-800 bg-slate-900/70 overflow-hidden">
+      <button class="faq-btn w-full flex items-center justify-between px-5 py-4 text-left text-sm font-medium text-slate-100 hover:bg-slate-800/50 transition">
+        <span>Are the rates final / guaranteed?</span>
+        <svg class="faq-chevron h-4 w-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+      </button>
+      <div class="faq-answer px-5 text-sm text-slate-300 leading-relaxed">
+        <div class="pb-4">No. The rates displayed here are indicative and scraped from each provider's public website. Final rates may vary depending on transfer amount, payment method and time of execution. Always confirm the rate on the provider's own platform before transacting.</div>
+      </div>
+    </div>
+    <div class="faq-item rounded-xl border border-slate-800 bg-slate-900/70 overflow-hidden">
+      <button class="faq-btn w-full flex items-center justify-between px-5 py-4 text-left text-sm font-medium text-slate-100 hover:bg-slate-800/50 transition">
+        <span>Which providers do you compare?</span>
+        <svg class="faq-chevron h-4 w-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+      </button>
+      <div class="faq-answer px-5 text-sm text-slate-300 leading-relaxed">
+        <div class="pb-4"><strong>Banks:</strong> ANZ, Commonwealth Bank, NAB, Westpac<br/><strong>Fintech:</strong> Wise, Remitly, OFX<br/><strong>Offline Exchanges:</strong> United Currency Exchange, Travel Money Oz, Travelex</div>
+      </div>
+    </div>
+    <div class="faq-item rounded-xl border border-slate-800 bg-slate-900/70 overflow-hidden">
+      <button class="faq-btn w-full flex items-center justify-between px-5 py-4 text-left text-sm font-medium text-slate-100 hover:bg-slate-800/50 transition">
+        <span>Which currencies do you support?</span>
+        <svg class="faq-chevron h-4 w-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+      </button>
+      <div class="faq-answer px-5 text-sm text-slate-300 leading-relaxed">
+        <div class="pb-4">We track 21 currencies: KRW, CNY, INR, USD, EUR, GBP, JPY, NZD, PHP, VND, IDR, THB, MYR, TWD, NPR, ZAR, CAD, SEK, LKR, ARS and CLP. These cover the most popular remittance corridors from Australia.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧??FOOTER ?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧??-->
+<footer class="border-t border-slate-800 bg-slate-900/40">
+  <div class="mx-auto max-w-7xl px-4 py-10">
+    <div class="grid gap-8 sm:grid-cols-4">
+      <div>
+        <div class="flex items-center gap-2 mb-3">
+          <div class="h-7 w-7 rounded-lg bg-emerald-500 flex items-center justify-center text-slate-950 font-extrabold text-xs">A$</div>
+          <span class="font-bold text-white">AusMoneySaver</span>
+        </div>
+        <p class="text-xs text-slate-500 leading-relaxed">
+          Helping Australians find the best exchange rates since 2026. Compare banks, fintechs and offline money changers in one place.
+        </p>
+      </div>
+      <div>
+        <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">Quick Links</h3>
+        <ul class="space-y-2 text-xs text-slate-500">
+          <li><a href="#calculator" class="hover:text-emerald-300 transition">Calculator</a></li>
+          <li><a href="#compare" class="hover:text-emerald-300 transition">Compare Rates</a></li>
+          <li><a href="#savings" class="hover:text-emerald-300 transition">Savings Calculator</a></li>
+          <li><a href="#providers" class="hover:text-emerald-300 transition">Providers</a></li>
+          <li><a href="#faq" class="hover:text-emerald-300 transition">FAQ</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">Legal</h3>
+        <ul class="space-y-2 text-xs text-slate-500">
+          <li><a href="#" class="hover:text-emerald-300 transition">Privacy Policy</a></li>
+          <li><a href="#" class="hover:text-emerald-300 transition">Terms of Service</a></li>
+          <li><a href="#" class="hover:text-emerald-300 transition">Disclaimer</a></li>
+          <li><a href="#" class="hover:text-emerald-300 transition">Cookie Policy</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">Connect</h3>
+        <div class="flex gap-3">
+          <a href="#" class="h-9 w-9 rounded-xl bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-700 transition" title="Facebook">
+            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          </a>
+          <a href="#" class="h-9 w-9 rounded-xl bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-700 transition" title="Twitter / X">
+            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          </a>
+          <a href="#" class="h-9 w-9 rounded-xl bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-700 transition" title="Instagram">
+            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+          </a>
+          <a href="https://github.com/kenjin95/AusMoneySaver-Backend" target="_blank" class="h-9 w-9 rounded-xl bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-700 transition" title="GitHub">
+            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+          </a>
+        </div>
+        <div class="mt-4 text-xs text-slate-600">
+          Last updated: <span id="footer-updated">??/span>
+        </div>
+      </div>
+    </div>
+    <div class="mt-8 pt-6 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-2 text-[10px] text-slate-600">
+      <span>짤 2026 AusMoneySaver. All rights reserved. Data is indicative only ??always verify with the provider.</span>
+      <span>Made with ?뮍 in Melbourne, Australia</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧??CONFIG + APP LOGIC ?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧??-->
+<script src="./config.js"></script>
+<script>
+(() => {
+  // ?? Data constants ??????????????????????????????????????????????
+  const CM = {
+    KRW:{name:"South Korean Won",flag:"?눖?눟"},CNY:{name:"Chinese Yuan",flag:"?눊?눛"},
+    INR:{name:"Indian Rupee",flag:"?눒?눛"},USD:{name:"US Dollar",flag:"?눣?눡"},
+    EUR:{name:"Euro",flag:"?눎?눣"},GBP:{name:"British Pound",flag:"?눐?눉"},
+    JPY:{name:"Japanese Yen",flag:"?눓?눝"},NZD:{name:"NZ Dollar",flag:"?눛?눨"},
+    PHP:{name:"Philippine Peso",flag:"?눝?눑"},VND:{name:"Vietnamese Dong",flag:"?눤?눛"},
+    IDR:{name:"Indonesian Rupiah",flag:"?눒?눍"},THB:{name:"Thai Baht",flag:"?눢?눑"},
+    MYR:{name:"Malaysian Ringgit",flag:"?눚?눧"},TWD:{name:"Taiwan Dollar",flag:"?눢?눥"},
+    NPR:{name:"Nepalese Rupee",flag:"?눛?눝"},ZAR:{name:"SA Rand",flag:"?눨?눇"},
+    CAD:{name:"Canadian Dollar",flag:"?눊?눇"},SEK:{name:"Swedish Krona",flag:"?눡?눎"},
+    LKR:{name:"Sri Lankan Rupee",flag:"?눘?눖"},ARS:{name:"Argentine Peso",flag:"?눇?눟"},
+    CLP:{name:"Chilean Peso",flag:"?눊?눘"},
+  };
+
+  const PROVIDERS = [
+    {key:"ANZ",label:"ANZ",type:"Bank",url:"https://www.anz.com.au/personal/travel-and-international/foreign-exchange",desc:"One of Australia's Big Four banks. Wide branch network, but rates often lag behind fintechs."},
+    {key:"CommBank",label:"CommBank",type:"Bank",url:"https://www.commbank.com.au/international/foreign-exchange",desc:"Australia's largest bank by market cap. Convenient for existing customers, but higher margins."},
+    {key:"NAB",label:"NAB",type:"Bank",url:"https://www.nab.com.au/personal/international-banking/foreign-exchange-rates",desc:"NAB FX calculator rates for international money transfers from Australia."},
+    {key:"Westpac",label:"Westpac",type:"Bank",url:"https://www.westpac.com.au/personal-banking/services/currency-converter/",desc:"Westpac Big Four bank rates from their public currency converter."},
+    {key:"Wise",label:"Wise",type:"Fintech",url:"https://wise.com/au",desc:"Leading fintech for international transfers. Near mid-market rates with transparent, low fees."},
+    {key:"Remitly",label:"Remitly",type:"Fintech",url:"https://www.remitly.com/au/en",desc:"Popular remittance service with competitive rates and fast delivery to many Asian countries."},
+    {key:"OFX",label:"OFX",type:"Fintech",url:"https://www.ofx.com/en-au/currency-converter/",desc:"Australia-origin fintech transfer provider with public calculator rates and fee disclosure."},
+    {key:"UnitedCurrency",label:"United Currency",type:"Offline",url:"https://www.unitedcurrencyexchange.com.au",desc:"Melbourne and Sydney offline currency exchange. No fees, no commission. Walk-in cash exchange with competitive rates."},
+    {key:"TravelMoneyOz",label:"Travel Money Oz",type:"Offline",url:"https://www.travelmoneyoz.com.au",desc:"Cash exchange specialist with 90+ locations across Australia. Same-day currency delivery and collection available."},
+    {key:"Travelex",label:"Travelex",type:"Offline",url:"https://www.travelex.com.au/",desc:"Large Australian cash-exchange network with publicly exposed retail cash rates."},
+  ];
+
+  const POPULAR = ["KRW","USD","EUR","GBP","JPY","PHP","VND","INR"];
+  const UTM = {
+    source: "ausmoneysaver",
+    medium: "affiliate",
+    campaign: "best-rate",
+  };
+
+  // ?? State ???????????????????????????????????????????????????????
+  let allData=[], byCurrency={}, activeGroup="", activeMetric="send", focusCurrency="";
+
+  function providerByKey(providerKey){
+    return PROVIDERS.find(p=>p.key===providerKey)||null;
+  }
+
+  function providerLink(providerKey, placement, currency){
+    const provider=providerByKey(providerKey);
+    if(!provider)return "#";
+    const config=window.AUSMONEY_CONFIG||{};
+    const override=config?.affiliateLinks?.[providerKey];
+    const baseUrl=override||provider.url;
+    try{
+      const url=new URL(baseUrl);
+      url.searchParams.set("utm_source",UTM.source);
+      url.searchParams.set("utm_medium",UTM.medium);
+      url.searchParams.set("utm_campaign",UTM.campaign);
+      if(placement)url.searchParams.set("utm_content",placement);
+      if(currency)url.searchParams.set("utm_term",currency);
+      return url.toString();
+    }catch(_){
+      return baseUrl;
+    }
+  }
+
+  // ?? Supabase fetch ??????????????????????????????????????????????
+  async function fetchData(){
+    const c=window.AUSMONEY_CONFIG;
+    if(!c?.supabaseUrl||!c?.supabaseKey) return {ok:false,error:"Missing config.js"};
+    const h={apikey:c.supabaseKey,Authorization:`Bearer ${c.supabaseKey}`,Accept:"application/json"};
+    for(const ep of ["latest_exchange_rates?select=*","exchange_rates?order=scraped_at.desc&limit=5000"]){
+      try{
+        const r=await fetch(`${c.supabaseUrl}/rest/v1/${ep}`,{headers:h});
+        if(r.ok){const d=await r.json();return{ok:true,data:d,view:ep.startsWith("latest")};}
+      }catch(e){}
+    }
+    return {ok:false,error:"Cannot reach Supabase. Check config.js."};
+  }
+
+  function dedup(rows){
+    const s={};
+    // Sort by scraped_at desc to keep latest
+    const sorted=[...rows].sort((a,b)=>new Date(b.scraped_at)-new Date(a.scraped_at));
+    for(const r of sorted){
+      const k=`${r.provider}::${r.currency}`;
+      if(!s[k])s[k]=r;
+    }
+    // Also handle "United Currency" -> "UnitedCurrency" mapping
+    const fixed=[];
+    for(const r of Object.values(s)){
+      if(r.provider==="United Currency")r.provider="UnitedCurrency";
+      fixed.push(r);
+    }
+    return fixed;
+  }
+  function group(rows){
+    const o={};
+    for(const r of rows){
+      // Normalize provider names
+      let p=r.provider;
+      if(p==="United Currency")p="UnitedCurrency";
+      if(!o[r.currency])o[r.currency]={};
+      // Keep latest if duplicate
+      if(!o[r.currency][p]||new Date(r.scraped_at)>new Date(o[r.currency][p].scraped_at)){
+        o[r.currency][p]=r;
+        o[r.currency][p].provider=p; // Update provider name
+      }
+    }
+    return o;
+  }
+
+  // ?? Format helpers ??????????????????????????????????????????????
+  function fmt(v){
+    if(v==null)return"--";
+    if(v>=10000)return v.toLocaleString("en-AU",{maximumFractionDigits:0});
+    if(v>=1000)return v.toLocaleString("en-AU",{maximumFractionDigits:2});
+    if(v>=100)return v.toFixed(2);
+    return v.toFixed(4);
+  }
+
+  function providerTone(providerType){
+    if(providerType==="Bank")return"sky";
+    if(providerType==="Fintech")return"violet";
+    return"amber";
+  }
+
+  function latestScrapedDate(){
+    if(!allData.length)return null;
+    const latest=allData.reduce((a,b)=>a.scraped_at>b.scraped_at?a:b);
+    return new Date(latest.scraped_at);
+  }
+
+  function netReceive(amountAud, row){
+    const rate=row?.send_rate;
+    if(rate==null)return null;
+    const fee=row?.fee||0;
+    const receive=(amountAud*rate)-fee;
+    return Number.isFinite(receive)?receive:null;
+  }
+
+  function getRankedQuotes(currency, amountAud){
+    if(!currency||!amountAud||amountAud<=0)return [];
+    const rd=byCurrency[currency]||{};
+    return PROVIDERS.map(provider=>{
+      const receive=netReceive(amountAud,rd[provider.key]);
+      if(receive==null)return null;
+      return {provider,receive};
+    }).filter(Boolean).sort((a,b)=>b.receive-a.receive);
+  }
+
+  function updateRecommendation(currencyOverride, amountOverride, rankedOverride){
+    const providerEl=document.getElementById("reco-provider");
+    const explainEl=document.getElementById("reco-explain");
+    const amountEl=document.getElementById("reco-amount");
+    const deltaEl=document.getElementById("reco-delta");
+    const ctaEl=document.getElementById("reco-cta");
+
+    const amount=amountOverride??(parseFloat(document.getElementById("calc-amount").value)||0);
+    const currency=currencyOverride??document.getElementById("calc-currency").value;
+    const ranked=rankedOverride??getRankedQuotes(currency,amount);
+
+    const setCtaDisabled=text=>{
+      ctaEl.textContent=text;
+      ctaEl.removeAttribute("href");
+      ctaEl.setAttribute("aria-disabled","true");
+      ctaEl.classList.add("opacity-50","cursor-not-allowed","pointer-events-none");
+    };
+    const setCtaEnabled=(provider,curr)=>{
+      ctaEl.textContent=`Open ${provider.label}`;
+      ctaEl.href=providerLink(provider.key,"hero-best",curr);
+      ctaEl.removeAttribute("aria-disabled");
+      ctaEl.classList.remove("opacity-50","cursor-not-allowed","pointer-events-none");
+    };
+
+    if(!amount||!currency){
+      providerEl.textContent="Set amount and currency";
+      explainEl.textContent="We will instantly rank providers by how much the receiver gets.";
+      amountEl.textContent="--";
+      deltaEl.textContent="--";
+      setCtaDisabled("Set amount first");
+      return;
+    }
+
+    if(!ranked.length){
+      providerEl.textContent=`No live quote for ${currency}`;
+      explainEl.textContent="Try another currency or refresh data.";
+      amountEl.textContent="--";
+      deltaEl.textContent="--";
+      setCtaDisabled("No live offer");
+      return;
+    }
+
+    const best=ranked[0];
+    const runnerUp=ranked[1];
+    providerEl.textContent=`${best.provider.label} for ${currency}`;
+    explainEl.textContent=`Best net receive for ${amount.toLocaleString("en-AU")} AUD after fee.`;
+    amountEl.textContent=`${fmt(best.receive)} ${currency}`;
+    if(runnerUp){
+      deltaEl.textContent=`+${fmt(best.receive-runnerUp.receive)} ${currency} vs ${runnerUp.provider.label}`;
+    }else{
+      deltaEl.textContent="Only one provider has a live quote right now.";
+    }
+    setCtaEnabled(best.provider,currency);
+  }
+
+  function setSavingsDefaults(){
+    const amount=parseFloat(document.getElementById("save-amount").value)||0;
+    const currency=document.getElementById("save-currency").value;
+    const fromEl=document.getElementById("save-from");
+    const toEl=document.getElementById("save-to");
+    const ranked=getRankedQuotes(currency,amount);
+    if(!ranked.length)return;
+    toEl.value=ranked[0].provider.key;
+    fromEl.value=ranked.length>1?ranked[ranked.length-1].provider.key:ranked[0].provider.key;
+  }
+
+  function updateTrustBadges(){
+    const freshnessEl=document.getElementById("freshness-badge");
+    const coverageEl=document.getElementById("coverage-badge");
+    const naEl=document.getElementById("na-badge");
+    const naNote="N/A means the provider did not quote that pair in the latest snapshot.";
+    if(!allData.length){
+      freshnessEl.textContent="Freshness: no data";
+      coverageEl.textContent="Coverage: no data";
+      naEl.textContent=naNote;
+      return;
+    }
+
+    const latestDate=latestScrapedDate();
+    if(!latestDate){
+      freshnessEl.textContent="Freshness: no data";
+      coverageEl.textContent="Coverage: no data";
+      naEl.textContent=naNote;
+      return;
+    }
+    const minsOld=Math.max(0,Math.round((Date.now()-latestDate.getTime())/60000));
+
+    if(minsOld<=45){
+      freshnessEl.className="rounded-full bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 text-emerald-300";
+      freshnessEl.textContent=`Freshness: ${minsOld<=1?"just updated":`${minsOld} min old`}`;
+    }else if(minsOld<=120){
+      freshnessEl.className="rounded-full bg-amber-500/10 border border-amber-500/30 px-2.5 py-1 text-amber-300";
+      freshnessEl.textContent=`Freshness: ${minsOld} min old`;
+    }else{
+      freshnessEl.className="rounded-full bg-rose-500/10 border border-rose-500/30 px-2.5 py-1 text-rose-300";
+      freshnessEl.textContent=`Freshness: stale (${minsOld} min old)`;
+    }
+
+    let livePairs=0;
+    const totalPairs=Object.keys(CM).length*PROVIDERS.length;
+    for(const code of Object.keys(CM)){
+      const rows=byCurrency[code]||{};
+      for(const provider of PROVIDERS){
+        const r=rows[provider.key];
+        if(r&&(r.send_rate!=null||r.receive_rate!=null))livePairs++;
+      }
+    }
+    const coveragePct=totalPairs?Math.round((livePairs/totalPairs)*100):0;
+    if(coveragePct>=90){
+      coverageEl.className="rounded-full bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 text-emerald-300";
+    }else if(coveragePct>=70){
+      coverageEl.className="rounded-full bg-amber-500/10 border border-amber-500/30 px-2.5 py-1 text-amber-300";
+    }else{
+      coverageEl.className="rounded-full bg-rose-500/10 border border-rose-500/30 px-2.5 py-1 text-rose-300";
+    }
+    coverageEl.textContent=`Coverage: ${livePairs}/${totalPairs} live pairs (${coveragePct}%)`;
+    naEl.textContent=naNote;
+  }
+
+  function bestSendRate(currency){
+    const rd=byCurrency[currency]||{};
+    let best=null;
+    for(const provider of PROVIDERS){
+      const rate=rd[provider.key]?.send_rate;
+      if(rate!=null&&(best==null||rate>best))best=rate;
+    }
+    return best;
+  }
+
+  function updateAlertSuggestedRate(force=false){
+    const currency=document.getElementById("alert-currency").value;
+    const targetEl=document.getElementById("alert-target-rate");
+    const best=bestSendRate(currency);
+    if(best==null){
+      if(force)targetEl.value="";
+      return;
+    }
+    if(force||!targetEl.value){
+      const suggested=best*1.002;
+      targetEl.value=suggested>=100?suggested.toFixed(2):suggested.toFixed(4);
+    }
+  }
+
+  function showAlertMessage(text,isError=false){
+    const msg=document.getElementById("alert-msg");
+    msg.textContent=text;
+    msg.classList.remove("hidden","text-emerald-300","text-rose-300");
+    msg.classList.add(isError?"text-rose-300":"text-emerald-300");
+  }
+
+  async function saveRateAlert({email,currency,targetRate,direction}){
+    const c=window.AUSMONEY_CONFIG;
+    if(!c?.supabaseUrl||!c?.supabaseKey){
+      return {ok:false,error:"Missing config.js"};
+    }
+    try{
+      const r=await fetch(`${c.supabaseUrl}/rest/v1/rate_alerts`,{
+        method:"POST",
+        headers:{
+          apikey:c.supabaseKey,
+          Authorization:`Bearer ${c.supabaseKey}`,
+          "Content-Type":"application/json",
+          Prefer:"return=minimal",
+        },
+        body:JSON.stringify([{
+          email,
+          currency,
+          target_rate:targetRate,
+          direction,
+          is_active:true,
+        }]),
+      });
+      if(!r.ok){
+        let detail="";
+        try{
+          const e=await r.json();
+          detail=e?.message||e?.details||e?.hint||"";
+        }catch(_){}
+        return {ok:false,error:detail||`Supabase error (${r.status})`};
+      }
+      return {ok:true};
+    }catch(e){
+      return {ok:false,error:e.message||"Network error"};
+    }
+  }
+
+  // ?? Populate dropdowns ??????????????????????????????????????????
+  function populateDropdowns(){
+    const opts=Object.entries(CM).map(([k,v])=>`<option value="${k}">${v.flag} ${k} ??${v.name}</option>`).join("");
+    const filterCurr=document.getElementById("filter-currency");
+    filterCurr.innerHTML=`<option value="">All 21 Currencies</option>`+opts;
+    document.getElementById("calc-currency").innerHTML=opts;
+    document.getElementById("save-currency").innerHTML=opts;
+    document.getElementById("alert-currency").innerHTML=opts;
+    const provOpts=PROVIDERS.map(p=>`<option value="${p.key}">${p.label}</option>`).join("");
+    document.getElementById("save-from").innerHTML=provOpts;
+    document.getElementById("save-to").innerHTML=provOpts;
+    document.getElementById("calc-currency").value="USD";
+    document.getElementById("save-currency").value="USD";
+    document.getElementById("alert-currency").value="USD";
+  }
+
+  // ?? Popular strip ???????????????????????????????????????????????
+  function renderPopular(){
+    const el=document.getElementById("popular-strip");
+    el.innerHTML=POPULAR.map(c=>{
+      const m=CM[c];
+      return `<button data-cur="${c}" class="popular-btn shrink-0 rounded-full border border-slate-700 bg-slate-800/60 px-4 py-2 text-xs font-medium text-slate-200 hover:bg-slate-700 hover:border-emerald-500/50 transition flex items-center gap-1.5">
+        <span>${m.flag}</span><span>${c}</span></button>`;
+    }).join("");
+    el.addEventListener("click",e=>{
+      const btn=e.target.closest("[data-cur]");
+      if(!btn)return;
+      focusCurrency=btn.dataset.cur;
+      document.getElementById("filter-currency").value=focusCurrency;
+      renderTable();
+      document.getElementById("compare").scrollIntoView({behavior:"smooth"});
+    });
+  }
+
+  // ?? Summary cards ???????????????????????????????????????????????
+  function updateCards(){
+    // Count "best deals" per provider instead of averaging rates (accounts for currency scales)
+    const bestCounts={};
+    for(const p of PROVIDERS) bestCounts[p.key]=0;
+    
+    for(const[,provs]of Object.entries(byCurrency)){
+      // Find best send_rate for this currency
+      let bestSend=null,bestProvider=null;
+      for(const[pk,row]of Object.entries(provs)){
+        if(row.send_rate!=null){
+          if(bestSend===null||row.send_rate>bestSend){
+            bestSend=row.send_rate;
+            bestProvider=pk;
+          }
+        }
+      }
+      if(bestProvider&&bestCounts[bestProvider]!==undefined)bestCounts[bestProvider]++;
+    }
+    
+    // Rank by best deal count
+    const ranked=[...PROVIDERS].filter(p=>bestCounts[p.key]>0)
+      .sort((a,b)=>bestCounts[b.key]-bestCounts[a.key]);
+    
+    if(ranked[0])document.getElementById("card-best-name").textContent=ranked[0].label;
+    const worst=[...ranked].reverse()[0];
+    if(worst)document.getElementById("card-worst-name").textContent=worst.label;
+    const bestOff=[...PROVIDERS.filter(p=>p.type==="Offline"&&bestCounts[p.key]>0)]
+      .sort((a,b)=>bestCounts[b.key]-bestCounts[a.key])[0];
+    if(bestOff)document.getElementById("card-offline-name").textContent=bestOff.label;
+  }
+
+  // ?? Provider cards ??????????????????????????????????????????????
+  function renderProviderCards(){
+    const el=document.getElementById("provider-cards");
+    el.innerHTML=PROVIDERS.map(p=>{
+      const tc=providerTone(p.type);
+      const href=providerLink(p.key,"provider-card","");
+      return `<div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-5 hover:border-${tc}-500/40 transition group">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="h-10 w-10 rounded-xl bg-${tc}-500/20 flex items-center justify-center text-${tc}-300 font-bold text-sm">${p.label.slice(0,2)}</div>
+          <div>
+            <div class="font-semibold text-white">${p.label}</div>
+            <div class="text-[10px] text-${tc}-400 uppercase font-bold tracking-wider">${p.type}</div>
+          </div>
+        </div>
+        <p class="text-xs text-slate-400 leading-relaxed mb-4">${p.desc}</p>
+        <a href="${href}" target="_blank" rel="noopener noreferrer sponsored nofollow"
+          class="inline-flex items-center gap-1 text-xs font-medium text-${tc}-300 hover:text-white transition">
+          Visit ${p.label}
+          <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+        </a>
+      </div>`;
+    }).join("");
+  }
+
+  // ?? Table header ????????????????????????????????????????????????
+  function renderHeader(vp){
+    const tr=document.getElementById("table-head-row");tr.innerHTML="";
+    const base="border-b border-slate-800 bg-slate-900/95 px-3 py-2.5 text-center text-[10px] font-semibold uppercase tracking-wider text-slate-400";
+    const th0=document.createElement("th");th0.className=`sticky left-0 z-30 ${base} text-left`;th0.textContent="Currency";tr.appendChild(th0);
+    for(const p of vp){
+      const tc=p.type==="Bank"?"text-sky-400":p.type==="Fintech"?"text-violet-400":"text-amber-400";
+      const th=document.createElement("th");th.className=`${base} min-w-[110px]`;
+      th.innerHTML=`${p.label}<br><span class="text-[9px] font-medium ${tc}">${p.type}</span>`;
+      tr.appendChild(th);
+    }
+  }
+
+  // ?? Table body ??????????????????????????????????????????????????
+  function renderTable(){
+    const tbody=document.getElementById("rates-body");tbody.innerHTML="";
+    const vp=PROVIDERS.filter(p=>!activeGroup||p.type===activeGroup);
+    renderHeader(vp);
+    const codes=focusCurrency?[focusCurrency]:Object.keys(CM);
+    let n=0;
+    for(const code of codes){
+      const m=CM[code];if(!m)continue;
+      const rd=byCurrency[code]||{};
+      const rk=activeMetric==="send"?"send_rate":"receive_rate";
+      let best=null;
+      for(const p of vp){const r=rd[p.key];if(r&&r[rk]!=null){if(best===null||r[rk]>best)best=r[rk];}}
+      const tr=document.createElement("tr");tr.className="border-b border-slate-800/50 hover:bg-slate-800/40 transition fade-in";
+      const td0=document.createElement("td");
+      td0.className="sticky left-0 z-10 whitespace-nowrap bg-slate-900/90 border-b border-slate-800/50 px-3 py-2.5 font-medium text-slate-100";
+      td0.innerHTML=`<span class="mr-1">${m.flag}</span><span class="font-semibold">${code}</span><span class="ml-1.5 text-[10px] text-slate-500 hidden sm:inline">${m.name}</span>`;
+      tr.appendChild(td0);
+      for(const p of vp){
+        const td=document.createElement("td");td.className="px-3 py-2.5 text-center align-middle";
+        const r=rd[p.key];const s=r?.send_rate;const rv=r?.receive_rate;
+        // Use epsilon comparison for floating point (0.0001 tolerance)
+        const ib=best!==null&&r?.[rk]!=null&&Math.abs(r[rk]-best)<0.0001;
+        if(!r||(s==null&&rv==null)){td.innerHTML=`<span class="text-slate-700 text-xs">N/A</span>`;
+        }else{
+          const sc=ib&&activeMetric==="send"?"text-emerald-300 font-semibold":"text-slate-100";
+          const rc=ib&&activeMetric==="receive"?"text-emerald-300 font-semibold":"text-slate-500";
+          td.innerHTML=`<div class="${sc} text-xs">${s!=null?fmt(s):"--"}</div>`
+            +`<div class="text-[10px] ${rc}">Recv: ${rv!=null?fmt(rv):"--"}</div>`
+            +(ib?`<div class="mt-0.5 text-[8px] font-bold text-emerald-400 uppercase tracking-wider">Best</div>`:"");
+        }
+        tr.appendChild(td);
+      }
+      tbody.appendChild(tr);n++;
+    }
+    document.getElementById("row-count").textContent=`${n} currencies`;
+  }
+
+  // ?? Calculator ??????????????????????????????????????????????????
+  function updateCalc(){
+    const amt=parseFloat(document.getElementById("calc-amount").value)||0;
+    const cur=document.getElementById("calc-currency").value;
+    const el=document.getElementById("calc-results");
+    const items=getRankedQuotes(cur,amt);
+    updateRecommendation(cur,amt,items);
+    if(!amt||!cur||!byCurrency[cur]||Object.keys(byCurrency[cur]||{}).length===0){
+      el.innerHTML=`<div class="text-xs text-slate-500 text-center py-4">Enter an amount to see results</div>`;return;
+    }
+    if(!items.length){el.innerHTML=`<div class="text-xs text-slate-500 text-center py-4">No rate data for ${cur}</div>`;return;}
+    const best=items[0].receive;
+    el.innerHTML=items.map((x,i)=>{
+      const isBest=i===0;
+      const border=isBest?"border-emerald-500/40 bg-emerald-500/5":"border-slate-700 bg-slate-800/50";
+      const badge=isBest?`<span class="text-[9px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">BEST</span>`:"";
+      const diff=isBest?"":`<span class="text-[10px] text-rose-400">??{fmt(best-x.receive)} ${cur}</span>`;
+      const tc=providerTone(x.provider.type);
+      const ctaHref=providerLink(x.provider.key,isBest?"calc-best":"calc-row",cur);
+      return `<div class="flex items-center justify-between rounded-xl border ${border} px-4 py-3 transition hover:bg-slate-800/70">
+        <div class="flex items-center gap-3">
+          <div class="h-8 w-8 rounded-lg bg-${tc}-500/20 flex items-center justify-center text-${tc}-300 text-[10px] font-bold">${x.provider.label.slice(0,2)}</div>
+          <div><div class="text-sm font-medium text-white">${x.provider.label}</div><div class="text-[10px] text-${tc}-400">${x.provider.type}</div></div>
+        </div>
+        <div class="text-right">
+          <div class="text-sm font-semibold ${isBest?"text-emerald-300":"text-white"}">${fmt(x.receive)} ${cur}</div>
+          <div class="flex items-center gap-2 justify-end">${badge}${diff}</div>
+          <a href="${ctaHref}" target="_blank" rel="noopener noreferrer sponsored nofollow"
+            class="mt-1 inline-flex items-center text-[10px] font-semibold ${isBest?"text-emerald-300":"text-sky-300"} hover:text-white transition">
+            Go to ${x.provider.label}
+          </a>
+        </div>
+      </div>`;
+    }).join("");
+  }
+
+  // ?? Savings calc ????????????????????????????????????????????????
+  function calcSavings(){
+    const amt=parseFloat(document.getElementById("save-amount").value)||0;
+    const cur=document.getElementById("save-currency").value;
+    const fromKey=document.getElementById("save-from").value;
+    const toKey=document.getElementById("save-to").value;
+    const rd=byCurrency[cur]||{};
+    const fromRate=rd[fromKey]?.send_rate;
+    const toRate=rd[toKey]?.send_rate;
+    const fromFee=rd[fromKey]?.fee||0;
+    const toFee=rd[toKey]?.fee||0;
+    const res=document.getElementById("save-result");
+    if(!amt||fromRate==null||toRate==null){res.classList.add("hidden");return;}
+    const fromAmt=amt*fromRate-fromFee;
+    const toAmt=amt*toRate-toFee;
+    const diff=toAmt-fromAmt;
+    // Avoid division by zero
+    const pct=fromAmt>0?((diff/fromAmt)*100):(toAmt>0?100:0);
+    const fromP=PROVIDERS.find(p=>p.key===fromKey);
+    const toP=PROVIDERS.find(p=>p.key===toKey);
+    document.getElementById("save-from-label").textContent=fromP?.label||fromKey;
+    document.getElementById("save-from-amount").textContent=`${fmt(fromAmt)} ${cur}`;
+    document.getElementById("save-from-rate").textContent=`Rate: ${fmt(fromRate)}`;
+    document.getElementById("save-to-label").textContent=toP?.label||toKey;
+    document.getElementById("save-to-amount").textContent=`${fmt(toAmt)} ${cur}`;
+    document.getElementById("save-to-rate").textContent=`Rate: ${fmt(toRate)}`;
+    document.getElementById("save-diff").textContent=`${diff>=0?"+":""}${fmt(Math.abs(diff))} ${cur}`;
+    document.getElementById("save-pct").textContent=`${diff>=0?"Save":"Lose"} ${Math.abs(pct).toFixed(1)}%`;
+    res.classList.remove("hidden");
+  }
+
+  // ?? Timestamps ??????????????????????????????????????????????????
+  function updateTimestamps(){
+    const d=latestScrapedDate();
+    if(!d)return;
+    const ts=d.toLocaleString("en-AU",{timeZone:"Australia/Sydney",hour12:false,year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit"});
+    document.getElementById("last-updated").textContent=ts;
+    document.getElementById("footer-updated").textContent=ts;
+    const mins=Math.round((Date.now()-d.getTime())/60000);
+    document.getElementById("data-age").textContent=mins<60?`${mins} min ago`:`${Math.round(mins/60)}h ago`;
+  }
+
+  // ?? Loading/Error states ????????????????????????????????????????
+  function setLoading(on){
+    if(on){
+      document.getElementById("rates-body").innerHTML=`<tr><td colspan="7" class="px-4 py-12 text-center text-slate-400">
+        <svg class="spin h-5 w-5 mx-auto mb-2 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>Loading rates...</td></tr>`;
+      document.getElementById("refresh-icon").classList.add("spin");
+    }else{document.getElementById("refresh-icon").classList.remove("spin");}
+  }
+  function setError(msg){
+    document.getElementById("rates-body").innerHTML=`<tr><td colspan="7" class="px-4 py-12 text-center text-rose-300">
+      <svg class="h-5 w-5 mx-auto mb-2 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>${msg}</td></tr>`;
+    document.getElementById("refresh-icon").classList.remove("spin");
+  }
+
+  // ?? Main load ???????????????????????????????????????????????????
+  async function load(){
+    if(window.location.protocol==="file:"){
+      setError("This page must be opened via a local web server, not as a file.<br>Run <code class='bg-slate-800 px-2 py-0.5 rounded text-emerald-300'>python -m http.server 8080</code> inside the <code class='bg-slate-800 px-2 py-0.5 rounded text-emerald-300'>frontend</code> folder, then open <code class='bg-slate-800 px-2 py-0.5 rounded text-emerald-300'>http://localhost:8080</code>");
+      return;
+    }
+    setLoading(true);
+    try{
+      const{ok,data,view,error}=await fetchData();
+      if(!ok||!data?.length){setError(error||"No data. Run supabase_setup.sql and check GitHub Actions.");return;}
+      allData=view?data:dedup(data);
+      byCurrency=group(allData);
+      updateTimestamps();
+      updateTrustBadges();
+      updateCards();
+      renderTable();
+      setSavingsDefaults();
+      updateCalc();
+      calcSavings();
+      updateAlertSuggestedRate(true);
+      setLoading(false);
+    }catch(e){
+      console.error("Load failed:",e);
+      setError("Failed to load data: "+e.message);
+    }
+  }
+
+  // ?? Events ??????????????????????????????????????????????????????
+  document.getElementById("refresh-btn").addEventListener("click",load);
+  document.getElementById("filter-currency").addEventListener("change",e=>{focusCurrency=e.target.value;renderTable();});
+  document.getElementById("filter-metric").addEventListener("change",e=>{activeMetric=e.target.value;renderTable();});
+  document.getElementById("group-btns").addEventListener("click",e=>{
+    const btn=e.target.closest("button[data-group]");if(!btn)return;
+    activeGroup=btn.dataset.group;
+    document.querySelectorAll("#group-btns button").forEach(b=>{b.className=b.dataset.group===activeGroup?"pill-on rounded-full px-3 py-2 text-xs font-medium border transition":"pill-off rounded-full px-3 py-2 text-xs font-medium transition";});
+    renderTable();
+  });
+  document.getElementById("calc-amount").addEventListener("input",updateCalc);
+  document.getElementById("calc-currency").addEventListener("change",updateCalc);
+  document.getElementById("save-calc-btn").addEventListener("click",calcSavings);
+  const onSavingsBaseChange=()=>{setSavingsDefaults();calcSavings();};
+  document.getElementById("save-amount").addEventListener("input",onSavingsBaseChange);
+  document.getElementById("save-amount").addEventListener("change",onSavingsBaseChange);
+  document.getElementById("save-currency").addEventListener("change",onSavingsBaseChange);
+  document.getElementById("save-from").addEventListener("change",calcSavings);
+  document.getElementById("save-to").addEventListener("change",calcSavings);
+  document.getElementById("alert-currency").addEventListener("change",()=>updateAlertSuggestedRate(true));
+
+  // FAQ accordion
+  document.querySelectorAll(".faq-btn").forEach(btn=>{
+    btn.addEventListener("click",()=>{btn.closest(".faq-item").classList.toggle("faq-open");});
+  });
+
+  // Mobile menu
+  document.getElementById("mobile-menu-btn").addEventListener("click",()=>{
+    document.getElementById("mobile-menu").classList.toggle("hidden");
+  });
+  document.querySelectorAll("#mobile-menu a").forEach(a=>{
+    a.addEventListener("click",()=>{document.getElementById("mobile-menu").classList.add("hidden");});
+  });
+
+  // Alert signup
+  document.getElementById("alert-form").addEventListener("submit",async e=>{
+    e.preventDefault();
+    const form=e.currentTarget;
+    const submitBtn=form.querySelector('button[type="submit"]');
+    const email=document.getElementById("alert-email").value.trim().toLowerCase();
+    const currency=document.getElementById("alert-currency").value;
+    const targetRate=parseFloat(document.getElementById("alert-target-rate").value);
+    if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+      showAlertMessage("Enter a valid email address.",true);
+      return;
+    }
+    if(!currency){
+      showAlertMessage("Select a currency.",true);
+      return;
+    }
+    if(!Number.isFinite(targetRate)||targetRate<=0){
+      showAlertMessage("Enter a valid target send rate.",true);
+      return;
+    }
+
+    submitBtn.disabled=true;
+    submitBtn.classList.add("opacity-70","cursor-not-allowed");
+    showAlertMessage("Saving alert...");
+    const saved=await saveRateAlert({
+      email,
+      currency,
+      targetRate,
+      direction:"gte",
+    });
+    submitBtn.disabled=false;
+    submitBtn.classList.remove("opacity-70","cursor-not-allowed");
+
+    if(!saved.ok){
+      showAlertMessage(saved.error||"Failed to save alert.",true);
+      return;
+    }
+    showAlertMessage(`Saved: ${currency} send rate at or above ${fmt(targetRate)}.`);
+    document.getElementById("alert-email").value="";
+  });
+
+  // Auto-refresh every 30min
+  setInterval(load,30*60*1000);
+  setInterval(()=>{updateTimestamps();updateTrustBadges();},60*1000);
+
+  // ?? Boot ????????????????????????????????????????????????????????
+  populateDropdowns();
+  renderPopular();
+  renderProviderCards();
+  load();
+})();
+</script>
+</body>
+</html>
+

@@ -35,6 +35,26 @@ CURRENCY_TO_COUNTRY = {
 
 PRICING_URL = "https://www.remitly.com/au/en/{country}/pricing"
 
+RATE_PATTERNS = (
+    r"([\d,]+\.?\d*)\s*{code}\s*to\s*1\s*AUD",
+    r"1\s*AUD[^<]{{0,30}}([\d,]+\.?\d*)\s*{code}",
+    r"rate\s*of\s*([\d,]+\.?\d*)\s*{code}",
+)
+
+
+def _extract_rate(text: str, code: str) -> float | None:
+    for pattern in RATE_PATTERNS:
+        m = re.search(pattern.format(code=code), text, re.IGNORECASE)
+        if not m:
+            continue
+        try:
+            rate_val = float(m.group(1).replace(",", ""))
+        except ValueError:
+            continue
+        if rate_val > 0:
+            return rate_val
+    return None
+
 
 def _scrape_converter(code: str) -> CurrencyRate | None:
     """Scrape Remitly's currency converter page for a rate.
@@ -51,23 +71,8 @@ def _scrape_converter(code: str) -> CurrencyRate | None:
 
     text = resp.text
 
-    patterns = [
-        rf"([\d,]+\.?\d*)\s*{code}\s*to\s*1\s*AUD",
-        rf"1\s*AUD[^<]{{0,30}}([\d,]+\.?\d*)\s*{code}",
-        rf"rate\s*of\s*([\d,]+\.?\d*)\s*{code}",
-    ]
-
-    rate_val = None
-    for pat in patterns:
-        m = re.search(pat, text, re.IGNORECASE)
-        if m:
-            try:
-                rate_val = float(m.group(1).replace(",", ""))
-                break
-            except ValueError:
-                continue
-
-    if rate_val is None or rate_val <= 0:
+    rate_val = _extract_rate(text, code)
+    if rate_val is None:
         return None
 
     fee = None
@@ -112,25 +117,13 @@ def _scrape_pricing(code: str) -> CurrencyRate | None:
 
     text = resp.text
 
-    patterns = [
-        rf"([\d,]+\.?\d*)\s*{code}\s*to\s*1\s*AUD",
-        rf"rate\s*of\s*([\d,]+\.?\d*)\s*{code}",
-        rf"1\s*AUD[^<]{{0,30}}([\d,]+\.?\d*)\s*{code}",
-    ]
-
-    for pat in patterns:
-        m = re.search(pat, text, re.IGNORECASE)
-        if m:
-            try:
-                rate_val = float(m.group(1).replace(",", ""))
-                if rate_val > 0:
-                    return CurrencyRate(
-                        currency_code=code,
-                        send_rate=rate_val,
-                        receive_rate=rate_val,
-                    )
-            except ValueError:
-                continue
+    rate_val = _extract_rate(text, code)
+    if rate_val is not None:
+        return CurrencyRate(
+            currency_code=code,
+            send_rate=rate_val,
+            receive_rate=rate_val,
+        )
 
     return None
 
@@ -142,7 +135,7 @@ def scrape_remitly() -> ProviderResult:
     is their advertised rate (may include new-customer bonus on first $1000).
     Fees: Economy $1.99, Express $3.99 per transfer.
     """
-    result = ProviderResult(provider="Remitly", provider_type="fintech")
+    result = ProviderResult(provider="Remitly", provider_type="Fintech")
 
     for code in TARGET_CURRENCIES:
         rate = _scrape_converter(code)
