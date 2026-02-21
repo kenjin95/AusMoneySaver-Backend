@@ -42,7 +42,7 @@ Useful ops commands:
 ```bash
 python scripts/check_db_schema.py
 python scripts/check_data_freshness.py --threshold-minutes 120
-python scripts/prune_exchange_rates.py --days 90 --run-days 180 --dry-run
+python scripts/prune_exchange_rates.py --days 60 --run-days 180 --dry-run
 ```
 
 ## GitHub Actions workflows
