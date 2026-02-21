@@ -23,6 +23,35 @@ where run_id is null;
 alter table public.exchange_rates alter column run_id set not null;
 alter table public.exchange_rates alter column run_id set default 'manual';
 
+-- Normalize legacy provider_type values so the new constraint can be applied safely.
+update public.exchange_rates
+set provider_type = case
+  when lower(trim(provider_type)) in ('bank', 'banks') then 'Bank'
+  when lower(trim(provider_type)) in ('fintech', 'fin-tech', 'fin tech') then 'Fintech'
+  when lower(replace(trim(provider_type), ' ', '_')) in (
+    'offline', 'offline_exchange', 'offline_exchanges', 'cash_exchange', 'money_changer'
+  ) then 'Offline'
+  when lower(provider) in ('anz', 'commbank') then 'Bank'
+  when lower(provider) in ('wise', 'remitly') then 'Fintech'
+  when lower(provider) in ('unitedcurrency', 'united currency', 'travelmoneyoz') then 'Offline'
+  when lower(trim(provider_type)) like '%bank%' then 'Bank'
+  when lower(trim(provider_type)) like '%fin%' then 'Fintech'
+  else 'Offline'
+end
+where provider_type is distinct from case
+  when lower(trim(provider_type)) in ('bank', 'banks') then 'Bank'
+  when lower(trim(provider_type)) in ('fintech', 'fin-tech', 'fin tech') then 'Fintech'
+  when lower(replace(trim(provider_type), ' ', '_')) in (
+    'offline', 'offline_exchange', 'offline_exchanges', 'cash_exchange', 'money_changer'
+  ) then 'Offline'
+  when lower(provider) in ('anz', 'commbank') then 'Bank'
+  when lower(provider) in ('wise', 'remitly') then 'Fintech'
+  when lower(provider) in ('unitedcurrency', 'united currency', 'travelmoneyoz') then 'Offline'
+  when lower(trim(provider_type)) like '%bank%' then 'Bank'
+  when lower(trim(provider_type)) like '%fin%' then 'Fintech'
+  else 'Offline'
+end;
+
 do $$
 begin
   if not exists (
