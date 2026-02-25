@@ -22,9 +22,9 @@ def parse_timestamp(raw: str) -> datetime:
 
 def resolve_supabase_key() -> str:
     return (
-        os.getenv("SUPABASE_ANON_KEY")
+        os.getenv("SUPABASE_SERVICE_ROLE_KEY")
         or os.getenv("SUPABASE_KEY")
-        or os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+        or os.getenv("SUPABASE_ANON_KEY")
         or ""
     )
 
@@ -50,7 +50,16 @@ def fetch_latest_scraped_at(supabase_url: str, supabase_key: str) -> tuple[datet
             errors.append(f"{endpoint}: empty payload")
             continue
 
-        return parse_timestamp(payload[0]["scraped_at"]), endpoint
+        raw_ts = payload[0].get("scraped_at")
+        if not raw_ts:
+            errors.append(f"{endpoint}: scraped_at missing")
+            continue
+
+        try:
+            return parse_timestamp(raw_ts), endpoint
+        except (TypeError, ValueError):
+            errors.append(f"{endpoint}: invalid scraped_at={raw_ts!r}")
+            continue
 
     raise RuntimeError(" / ".join(errors))
 
@@ -105,7 +114,7 @@ def main() -> int:
                 return 0
 
             last_error = "Freshness check failed: data is stale."
-        except RuntimeError as e:
+        except Exception as e:
             last_error = f"Freshness check failed: {e}"
 
         if attempt < total_attempts:

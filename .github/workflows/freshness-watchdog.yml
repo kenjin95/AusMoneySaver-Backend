@@ -6,6 +6,10 @@ on:
     # Offset from scheduled scrape cron to reduce overlap race conditions.
     - cron: "27,57 * * * *"
 
+concurrency:
+  group: freshness-watchdog
+  cancel-in-progress: false
+
 jobs:
   freshness-check:
     runs-on: ubuntu-latest

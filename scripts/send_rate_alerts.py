@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import argparse
+import base64
+import json
 import os
 from datetime import datetime, timedelta, timezone
 from urllib.parse import urlencode, urlparse, parse_qsl, urlunparse
@@ -35,6 +37,24 @@ PROVIDER_AFFILIATE_ENV = {
     "TravelMoneyOz": "AFFILIATE_LINK_TRAVELMONEYOZ",
     "Travelex": "AFFILIATE_LINK_TRAVELEX",
 }
+
+
+def decode_jwt_role(token: str) -> str:
+    if token.count(".") < 2:
+        return "unknown"
+    try:
+        payload = token.split(".")[1]
+        payload += "=" * (-len(payload) % 4)
+        decoded = base64.urlsafe_b64decode(payload.encode("utf-8")).decode("utf-8")
+        return json.loads(decoded).get("role", "unknown")
+    except Exception:
+        return "unknown"
+
+
+def is_service_role_like_key(token: str) -> bool:
+    if token.startswith("sb_secret_"):
+        return True
+    return decode_jwt_role(token) == "service_role"
 
 
 def parse_iso(raw: str | None) -> datetime | None:
@@ -257,6 +277,13 @@ def main() -> int:
     if not supabase_url or not service_key:
         print("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY/SUPABASE_KEY.")
         return 1
+    if not is_service_role_like_key(service_key):
+        role = decode_jwt_role(service_key)
+        print(
+            "SUPABASE_SERVICE_ROLE_KEY is invalid for alert processing. "
+            f"Detected role={role!r}."
+        )
+        return 1
 
     resend_api_key = os.getenv("RESEND_API_KEY", "").strip()
     from_email = os.getenv("ALERT_FROM_EMAIL", "").strip()
@@ -291,7 +318,10 @@ def main() -> int:
         email = (alert.get("email") or "").strip()
         currency = (alert.get("currency") or "").strip().upper()
         direction = (alert.get("direction") or "gte").strip().lower()
-        target_rate = float(alert.get("target_rate") or 0)
+        try:
+            target_rate = float(alert.get("target_rate") or 0)
+        except (TypeError, ValueError):
+            target_rate = 0
         last_notified = parse_iso(alert.get("last_notified_at"))
 
         if not alert_id or not email or not currency or target_rate <= 0:

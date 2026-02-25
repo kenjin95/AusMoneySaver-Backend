@@ -72,6 +72,7 @@ jobs:
 
       - name: Send triggered rate alerts
         if: always()
+        continue-on-error: true
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
