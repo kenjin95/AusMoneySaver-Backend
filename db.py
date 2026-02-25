@@ -1,5 +1,7 @@
 """Supabase DB integration for AusMoneySaver."""
 
+import base64
+import json
 import os
 from datetime import datetime, timezone
 from functools import lru_cache
@@ -36,6 +38,24 @@ OFFLINE_PROVIDERS = {
 }
 
 
+def _decode_jwt_role(token: str) -> str:
+    if token.count(".") < 2:
+        return "unknown"
+    try:
+        payload = token.split(".")[1]
+        payload += "=" * (-len(payload) % 4)
+        decoded = base64.urlsafe_b64decode(payload.encode("utf-8")).decode("utf-8")
+        return json.loads(decoded).get("role", "unknown")
+    except Exception:
+        return "unknown"
+
+
+def _is_service_role_like_key(token: str) -> bool:
+    if token.startswith("sb_secret_"):
+        return True
+    return _decode_jwt_role(token) == "service_role"
+
+
 def _resolve_supabase_key() -> str:
     if SUPABASE_SERVICE_ROLE_KEY:
         return SUPABASE_SERVICE_ROLE_KEY
@@ -55,6 +75,12 @@ def get_client():
         raise RuntimeError(
             "SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set in .env "
             "(SUPABASE_KEY is accepted temporarily for backward compatibility)."
+        )
+    if not _is_service_role_like_key(supabase_key):
+        detected_role = _decode_jwt_role(supabase_key)
+        raise RuntimeError(
+            "Supabase admin operations require SUPABASE_SERVICE_ROLE_KEY. "
+            f"Current key role={detected_role!r}."
         )
     return create_client(SUPABASE_URL, supabase_key)
 

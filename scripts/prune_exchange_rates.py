@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 import argparse
+import base64
+import json
+import os
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 import sys
@@ -18,6 +21,24 @@ from db import get_client
 
 def _is_missing_table_error(error: APIError) -> bool:
     return "404" in str(error)
+
+
+def _decode_jwt_role(token: str) -> str:
+    if token.count(".") < 2:
+        return "unknown"
+    try:
+        payload = token.split(".")[1]
+        payload += "=" * (-len(payload) % 4)
+        decoded = base64.urlsafe_b64decode(payload.encode("utf-8")).decode("utf-8")
+        return json.loads(decoded).get("role", "unknown")
+    except Exception:
+        return "unknown"
+
+
+def _is_service_role_like_key(token: str) -> bool:
+    if token.startswith("sb_secret_"):
+        return True
+    return _decode_jwt_role(token) == "service_role"
 
 
 def count_older_than(client, table: str, column: str, cutoff_iso: str) -> int | None:
@@ -61,6 +82,19 @@ def main() -> int:
     )
     parser.add_argument("--dry-run", action="store_true", help="Show counts only.")
     args = parser.parse_args()
+
+    service_key = (
+        os.getenv("SUPABASE_SERVICE_ROLE_KEY", "").strip()
+        or os.getenv("SUPABASE_KEY", "").strip()
+    )
+    if not _is_service_role_like_key(service_key):
+        role = _decode_jwt_role(service_key)
+        print(
+            "[FAIL] SUPABASE_SERVICE_ROLE_KEY is missing or invalid for deletes. "
+            f"Detected role={role!r}.",
+            file=sys.stderr,
+        )
+        return 1
 
     now = datetime.now(timezone.utc)
     rates_cutoff = (now - timedelta(days=args.days)).isoformat()

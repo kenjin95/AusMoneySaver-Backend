@@ -9,7 +9,7 @@ on:
 jobs:
   freshness-check:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 25
 
     permissions:
       contents: read
@@ -29,6 +29,8 @@ jobs:
           pip install requests python-dotenv
 
       - name: Check data freshness
+        id: freshness_initial
+        continue-on-error: true
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
@@ -39,3 +41,33 @@ jobs:
             --threshold-minutes 120 \
             --retry-attempts 3 \
             --retry-delay-seconds 120
+
+      - name: Install scraper dependencies (recovery)
+        if: steps.freshness_initial.outcome == 'failure'
+        run: |
+          pip install -r requirements.txt
+          python -m playwright install chromium
+
+      - name: Run recovery scrape
+        if: steps.freshness_initial.outcome == 'failure'
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          SCRAPE_RUN_ID: watchdog-${{ github.run_id }}-${{ github.run_attempt }}
+          MIN_SUCCESS_PROVIDERS: "5"
+        run: |
+          python main.py --save --min-success-providers 5 --allow-partial-success
+
+      - name: Re-check data freshness after recovery
+        if: steps.freshness_initial.outcome == 'failure'
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          python scripts/check_data_freshness.py \
+            --threshold-minutes 120 \
+            --retry-attempts 2 \
+            --retry-delay-seconds 90
