@@ -181,7 +181,7 @@ drop policy if exists exchange_rates_select_policy on public.exchange_rates;
 create policy exchange_rates_select_policy
   on public.exchange_rates
   for select
-  to anon, authenticated
+  to service_role
   using (true);
 
 drop policy if exists exchange_rates_insert_service_policy on public.exchange_rates;
@@ -260,7 +260,7 @@ begin
 end $$;
 
 grant usage on schema public to anon, authenticated, service_role;
-grant select on public.exchange_rates to anon, authenticated;
+grant select on public.exchange_rates to service_role;
 grant insert on public.exchange_rates to service_role;
 grant usage, select on sequence public.exchange_rates_id_seq to service_role;
 
@@ -300,4 +300,4 @@ select distinct on (er.provider, er.currency)
 from public.exchange_rates er
 order by er.provider, er.currency, er.scraped_at desc, er.id desc;
 
-grant select on public.latest_exchange_rates to anon, authenticated;
+grant select on public.latest_exchange_rates to anon, authenticated, service_role;

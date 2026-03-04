@@ -31,7 +31,6 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
         run: |
           python scripts/prune_exchange_rates.py --days 60 --run-days 180
 
@@ -39,6 +38,5 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
         run: |
           python scripts/normalize_provider_aliases.py
