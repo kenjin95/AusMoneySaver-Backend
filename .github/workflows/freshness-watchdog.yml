@@ -2,9 +2,6 @@ name: Freshness watchdog
 
 on:
   workflow_dispatch:
-  schedule:
-    # Offset from scheduled scrape cron to reduce overlap race conditions.
-    - cron: "27,57 * * * *"
 
 concurrency:
   group: freshness-watchdog

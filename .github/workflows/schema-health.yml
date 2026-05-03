@@ -2,8 +2,6 @@ name: Supabase schema health
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "7 */6 * * *"
 
 jobs:
   schema-check:

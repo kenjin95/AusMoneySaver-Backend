@@ -2,10 +2,6 @@ name: Scheduled exchange rate scrape
 
 on:
   workflow_dispatch:
-  schedule:
-    # Poll every 10 minutes, but run scrape only when data is stale.
-    # This mitigates missed/delayed GitHub schedule ticks.
-    - cron: "*/10 * * * *"
 
 concurrency:
   group: scheduled-exchange-rate-scrape
